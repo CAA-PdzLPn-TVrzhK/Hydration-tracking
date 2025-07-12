@@ -1,0 +1,11 @@
+{
+  "name": "Hydration Tracking",
+  "short_name": "Hydration",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#42a5f5",
+  "theme_color": "#42a5f5",
+  "description": "Hydration Tracking Flutter Web App",
+  "orientation": "portrait-primary",
+  "icons": []
+} 
