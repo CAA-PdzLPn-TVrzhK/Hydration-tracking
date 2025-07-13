@@ -1,0 +1,129 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: hydration_postgres
+    environment:
+      POSTGRES_DB: hydration_tracking
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/migrations:/docker-entrypoint-initdb.d
+    networks:
+      - hydration_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for caching and sessions
+  redis:
+    image: redis:7-alpine
+    container_name: hydration_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - hydration_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Auth Service
+  auth-service:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.auth
+    container_name: hydration_auth_service
+    ports:
+      - "8081:8081"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=hydration_tracking
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - JWT_SECRET=your-secret-key
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hydration_network
+    restart: unless-stopped
+
+  # Hydration Service
+  hydration-service:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.hydration
+    container_name: hydration_hydration_service
+    ports:
+      - "8082:8082"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=hydration_tracking
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hydration_network
+    restart: unless-stopped
+
+  # API Gateway (Nginx)
+  nginx:
+    image: nginx:alpine
+    container_name: hydration_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - auth-service
+      - hydration-service
+    networks:
+      - hydration_network
+    restart: unless-stopped
+
+  # Flutter Web App
+  flutter-web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.web
+    container_name: hydration_flutter_web
+    ports:
+      - "3000:80"
+    depends_on:
+      - nginx
+    networks:
+      - hydration_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  hydration_network:
+    driver: bridge 
