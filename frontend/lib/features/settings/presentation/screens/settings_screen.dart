@@ -38,7 +38,7 @@ class SettingsScreen extends ConsumerWidget {
           // Daily Goal
           ListTile(
             leading: const Icon(Icons.flag),
-            title: const Text('Дневная цель'),
+            title: const Text('Дневная цел'),
             subtitle: const Text('2000 мл'),
             onTap: () {
               _showGoalDialog(context);
