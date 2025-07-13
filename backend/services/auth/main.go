@@ -51,7 +51,6 @@ var (
 )
 
 func init() {
-	// Load environment variables
 	connStr := "postgres://postgres:password@postgres:5432/hydration_tracking?sslmode=disable"
 	var err error
 	db, err = sql.Open("postgres", connStr)

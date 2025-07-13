@@ -51,7 +51,6 @@ func init() {
 		log.Fatal(err)
 	}
 
-	// Create hydration_entries table
 	createTable := `
 	CREATE TABLE IF NOT EXISTS hydration_entries (
 		id UUID PRIMARY KEY,
