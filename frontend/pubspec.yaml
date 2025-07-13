@@ -1,0 +1,86 @@
+name: hydration_tracker
+description: A cross-platform hydration tracking application
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: ">=3.16.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # State Management
+  provider: ^6.1.1
+  riverpod: ^2.4.9
+  flutter_riverpod: ^2.4.9
+  
+  # HTTP Client
+  dio: ^5.4.0
+  retrofit: ^4.0.3
+  
+  # Local Storage
+  shared_preferences: ^2.2.2
+  sqflite: ^2.3.0
+  path: ^1.8.3
+  
+  # UI Components
+  cupertino_icons: ^1.0.6
+  flutter_svg: ^2.0.9
+  cached_network_image: ^3.3.0
+  shimmer: ^3.0.0
+  
+  # Charts and Visualizations
+  fl_chart: ^0.66.0
+  
+  # Notifications
+  flutter_local_notifications: ^19.3.0
+  timezone: ^0.10.1
+  
+  # Date and Time
+  intl: ^0.19.0
+  
+  # Utilities
+  uuid: ^4.2.1
+  logger: ^2.0.2+1
+  
+  # Platform Specific
+  permission_handler: ^11.1.0
+  
+  # Web Support
+  universal_html: ^2.2.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  
+  # Code Generation
+  build_runner: ^2.4.7
+  json_annotation: ^4.8.1
+  retrofit_generator: ^7.0.8
+  
+  # Linting
+  flutter_lints: ^3.0.1
+  
+  # Testing
+  mockito: ^5.4.4
+  integration_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  # assets:
+  #   - assets/images/
+  #   - assets/icons/
+  #   - assets/animations/
+  # fonts:
+  #   - family: Poppins
+  #     fonts:
+  #       - asset: assets/fonts/Poppins-Regular.ttf
+  #       - asset: assets/fonts/Poppins-Medium.ttf
+  #         weight: 500
+  #       - asset: assets/fonts/Poppins-SemiBold.ttf
+  #         weight: 600
+  #       - asset: assets/fonts/Poppins-Bold.ttf
+  #         weight: 700 
