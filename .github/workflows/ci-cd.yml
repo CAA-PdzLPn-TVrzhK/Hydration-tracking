@@ -57,7 +57,12 @@ jobs:
       working-directory: backend
       run: |
         go vet ./...
-        ../golangci-lint-1.55.2-linux-amd64/golangci-lint run ./...
+
+    - name: Run golangci-lint in backend
+      uses: golangci/golangci-lint-action@v4
+      with:
+        version: v1.55.2
+        working-directory: backend
 
   # Frontend Tests
   frontend-tests:
