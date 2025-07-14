@@ -54,10 +54,10 @@ jobs:
         version: v1.55.2
 
     - name: Run backend linting
+      working-directory: backend
       run: |
-        cd backend
         go vet ./...
-        golangci-lint run
+        golangci-lint run ./...
 
   # Frontend Tests
   frontend-tests:
