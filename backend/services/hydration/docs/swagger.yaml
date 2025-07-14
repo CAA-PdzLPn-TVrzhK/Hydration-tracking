@@ -1,0 +1,143 @@
+basePath: /api/v1
+definitions:
+  _.CreateEntryRequest:
+    properties:
+      amount:
+        minimum: 1
+        type: integer
+      type:
+        type: string
+    required:
+    - amount
+    - type
+    type: object
+  _.HydrationEntry:
+    properties:
+      amount:
+        description: in ml
+        type: integer
+      id:
+        type: string
+      timestamp:
+        type: string
+      type:
+        description: water, tea, coffee, etc.
+        type: string
+      user_id:
+        type: string
+    type: object
+  _.HydrationStats:
+    properties:
+      goal:
+        type: integer
+      goal_percentage:
+        type: integer
+      total_month:
+        type: integer
+      total_today:
+        type: integer
+      total_week:
+        type: integer
+    type: object
+host: localhost:8082
+info:
+  contact: {}
+  description: Hydration tracking microservice for logging water intake
+  title: Hydration Tracking Service
+  version: "1.0"
+paths:
+  /entries:
+    get:
+      description: Retrieve all hydration entries for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/_.HydrationEntry'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get user's hydration entries
+      tags:
+      - hydration
+    post:
+      consumes:
+      - application/json
+      description: Log a new hydration entry for the authenticated user
+      parameters:
+      - description: Hydration entry data
+        in: body
+        name: entry
+        required: true
+        schema:
+          $ref: '#/definitions/_.CreateEntryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/_.HydrationEntry'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Log water intake
+      tags:
+      - hydration
+  /goal:
+    put:
+      consumes:
+      - application/json
+      description: Update the daily hydration goal for the authenticated user
+      parameters:
+      - description: Daily goal in ml
+        in: body
+        name: goal
+        required: true
+        schema:
+          additionalProperties:
+            type: integer
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update daily goal
+      tags:
+      - hydration
+  /stats:
+    get:
+      description: Get hydration statistics for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/_.HydrationStats'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get hydration statistics
+      tags:
+      - hydration
+swagger: "2.0"
