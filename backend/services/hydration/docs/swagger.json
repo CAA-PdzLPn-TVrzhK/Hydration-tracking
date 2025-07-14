@@ -1,0 +1,214 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Hydration tracking microservice for logging water intake",
+        "title": "Hydration Tracking Service",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8082",
+    "basePath": "/api/v1",
+    "paths": {
+        "/entries": {
+            "get": {
+                "description": "Retrieve all hydration entries for the authenticated user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "hydration"
+                ],
+                "summary": "Get user's hydration entries",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/_.HydrationEntry"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Log a new hydration entry for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "hydration"
+                ],
+                "summary": "Log water intake",
+                "parameters": [
+                    {
+                        "description": "Hydration entry data",
+                        "name": "entry",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/_.CreateEntryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/_.HydrationEntry"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/goal": {
+            "put": {
+                "description": "Update the daily hydration goal for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "hydration"
+                ],
+                "summary": "Update daily goal",
+                "parameters": [
+                    {
+                        "description": "Daily goal in ml",
+                        "name": "goal",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/stats": {
+            "get": {
+                "description": "Get hydration statistics for the authenticated user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "hydration"
+                ],
+                "summary": "Get hydration statistics",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/_.HydrationStats"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "_.CreateEntryRequest": {
+            "type": "object",
+            "required": [
+                "amount",
+                "type"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "_.HydrationEntry": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "description": "in ml",
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                },
+                "type": {
+                    "description": "water, tea, coffee, etc.",
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "_.HydrationStats": {
+            "type": "object",
+            "properties": {
+                "goal": {
+                    "type": "integer"
+                },
+                "goal_percentage": {
+                    "type": "integer"
+                },
+                "total_month": {
+                    "type": "integer"
+                },
+                "total_today": {
+                    "type": "integer"
+                },
+                "total_week": {
+                    "type": "integer"
+                }
+            }
+        }
+    }
+}
