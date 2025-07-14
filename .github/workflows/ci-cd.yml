@@ -53,16 +53,11 @@ jobs:
       with:
         version: v1.55.2
 
-    - name: Run backend linting
-      working-directory: backend
-      run: |
-        go vet ./...
-
-    - name: Run golangci-lint in backend
-      uses: golangci/golangci-lint-action@v4
+    - name: Install golangci-lint
+      uses: golangci/golangci-lint-action@v6
       with:
-        version: v1.55.2
-        working-directory: backend
+        version: latest
+        args: --timeout=5m
 
   # Frontend Tests
   frontend-tests:
