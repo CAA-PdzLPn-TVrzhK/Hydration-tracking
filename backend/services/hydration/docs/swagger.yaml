@@ -1,6 +1,5 @@
-basePath: /api/v1
 definitions:
-  _.CreateEntryRequest:
+  hydration.CreateEntryRequest:
     properties:
       amount:
         minimum: 1
@@ -11,22 +10,20 @@ definitions:
     - amount
     - type
     type: object
-  _.HydrationEntry:
+  hydration.HydrationEntry:
     properties:
       amount:
-        description: in ml
         type: integer
       id:
         type: string
       timestamp:
         type: string
       type:
-        description: water, tea, coffee, etc.
         type: string
       user_id:
         type: string
     type: object
-  _.HydrationStats:
+  hydration.HydrationStats:
     properties:
       goal:
         type: integer
@@ -39,16 +36,12 @@ definitions:
       total_week:
         type: integer
     type: object
-host: localhost:8082
 info:
   contact: {}
-  description: Hydration tracking microservice for logging water intake
-  title: Hydration Tracking Service
-  version: "1.0"
 paths:
   /entries:
     get:
-      description: Retrieve all hydration entries for the authenticated user
+      description: Get all hydration entries for the user / Получить все записи пользователя
       produces:
       - application/json
       responses:
@@ -56,51 +49,77 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/_.HydrationEntry'
+              $ref: '#/definitions/hydration.HydrationEntry'
             type: array
         "401":
           description: Unauthorized
           schema:
-            additionalProperties: true
+            additionalProperties:
+              type: string
             type: object
-      summary: Get user's hydration entries
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all hydration entries / Получить все записи
       tags:
       - hydration
     post:
       consumes:
       - application/json
-      description: Log a new hydration entry for the authenticated user
+      description: Add a new hydration entry for the user / Добавить новую запись
+        о приёме воды
       parameters:
-      - description: Hydration entry data
+      - description: Entry data / Данные записи
         in: body
-        name: entry
+        name: data
         required: true
         schema:
-          $ref: '#/definitions/_.CreateEntryRequest'
+          $ref: '#/definitions/hydration.CreateEntryRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/_.HydrationEntry'
+            $ref: '#/definitions/hydration.HydrationEntry'
         "400":
           description: Bad Request
           schema:
-            additionalProperties: true
+            additionalProperties:
+              type: string
             type: object
-      summary: Log water intake
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Add hydration entry / Добавить запись о приёме воды
       tags:
       - hydration
   /goal:
     put:
       consumes:
       - application/json
-      description: Update the daily hydration goal for the authenticated user
+      description: Update daily hydration goal for the user / Обновить дневную цель
+        пользователя
       parameters:
-      - description: Daily goal in ml
+      - description: Goal data / Новая цель
         in: body
-        name: goal
+        name: data
         required: true
         schema:
           additionalProperties:
@@ -117,27 +136,51 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties: true
+            additionalProperties:
+              type: string
             type: object
-      summary: Update daily goal
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update daily goal / Обновить дневную цель
       tags:
       - hydration
   /stats:
     get:
-      description: Get hydration statistics for the authenticated user
+      description: Get hydration statistics for the user / Получить статистику пользователя
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/_.HydrationStats'
+            $ref: '#/definitions/hydration.HydrationStats'
         "401":
           description: Unauthorized
           schema:
-            additionalProperties: true
+            additionalProperties:
+              type: string
             type: object
-      summary: Get hydration statistics
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get hydration stats / Получить статистику
       tags:
       - hydration
 swagger: "2.0"

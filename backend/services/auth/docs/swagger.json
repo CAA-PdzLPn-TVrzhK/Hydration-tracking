@@ -1,17 +1,12 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Authentication and Authorization microservice for Hydration Tracking",
-        "title": "Hydration Tracking Auth Service",
-        "contact": {},
-        "version": "1.0"
+        "contact": {}
     },
-    "host": "localhost:8081",
-    "basePath": "/api/v1",
     "paths": {
         "/login": {
             "post": {
-                "description": "Authenticate user and return JWT token",
+                "description": "Login user and get JWT / Войти и получить JWT",
                 "consumes": [
                     "application/json"
                 ],
@@ -21,18 +16,62 @@
                 "tags": [
                     "auth"
                 ],
-                "summary": "Login user",
+                "summary": "Login user / Вход пользователя",
                 "parameters": [
                     {
-                        "description": "Login credentials",
-                        "name": "credentials",
+                        "description": "Login data / Данные для входа",
+                        "name": "data",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/_.LoginRequest"
+                            "$ref": "#/definitions/auth.LoginRequest"
                         }
                     }
                 ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/profile": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get current user profile (JWT required) / Получить профиль по JWT",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Get user profile / Получить профиль пользователя",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -45,7 +84,9 @@
                         "description": "Unauthorized",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": true
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -53,7 +94,7 @@
         },
         "/register": {
             "post": {
-                "description": "Register a new user account",
+                "description": "Register a new user / Зарегистрировать нового пользователя",
                 "consumes": [
                     "application/json"
                 ],
@@ -63,15 +104,15 @@
                 "tags": [
                     "auth"
                 ],
-                "summary": "Register new user",
+                "summary": "Register new user / Регистрация пользователя",
                 "parameters": [
                     {
-                        "description": "User registration data",
-                        "name": "user",
+                        "description": "User data / Данные пользователя",
+                        "name": "data",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/_.RegisterRequest"
+                            "$ref": "#/definitions/auth.RegisterRequest"
                         }
                     }
                 ],
@@ -87,7 +128,9 @@
                         "description": "Bad Request",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": true
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -95,7 +138,7 @@
         }
     },
     "definitions": {
-        "_.LoginRequest": {
+        "auth.LoginRequest": {
             "type": "object",
             "required": [
                 "password",
@@ -110,7 +153,7 @@
                 }
             }
         },
-        "_.RegisterRequest": {
+        "auth.RegisterRequest": {
             "type": "object",
             "required": [
                 "email",

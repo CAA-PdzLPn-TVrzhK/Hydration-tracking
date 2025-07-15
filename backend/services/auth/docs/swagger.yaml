@@ -1,6 +1,5 @@
-basePath: /api/v1
 definitions:
-  _.LoginRequest:
+  auth.LoginRequest:
     properties:
       password:
         type: string
@@ -10,7 +9,7 @@ definitions:
     - password
     - username
     type: object
-  _.RegisterRequest:
+  auth.RegisterRequest:
     properties:
       email:
         type: string
@@ -24,25 +23,47 @@ definitions:
     - password
     - username
     type: object
-host: localhost:8081
 info:
   contact: {}
-  description: Authentication and Authorization microservice for Hydration Tracking
-  title: Hydration Tracking Auth Service
-  version: "1.0"
 paths:
   /login:
     post:
       consumes:
       - application/json
-      description: Authenticate user and return JWT token
+      description: Login user and get JWT / Войти и получить JWT
       parameters:
-      - description: Login credentials
+      - description: Login data / Данные для входа
         in: body
-        name: credentials
+        name: data
         required: true
         schema:
-          $ref: '#/definitions/_.LoginRequest'
+          $ref: '#/definitions/auth.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Login user / Вход пользователя
+      tags:
+      - auth
+  /profile:
+    get:
+      description: Get current user profile (JWT required) / Получить профиль по JWT
       produces:
       - application/json
       responses:
@@ -54,23 +75,26 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            additionalProperties: true
+            additionalProperties:
+              type: string
             type: object
-      summary: Login user
+      security:
+      - BearerAuth: []
+      summary: Get user profile / Получить профиль пользователя
       tags:
       - auth
   /register:
     post:
       consumes:
       - application/json
-      description: Register a new user account
+      description: Register a new user / Зарегистрировать нового пользователя
       parameters:
-      - description: User registration data
+      - description: User data / Данные пользователя
         in: body
-        name: user
+        name: data
         required: true
         schema:
-          $ref: '#/definitions/_.RegisterRequest'
+          $ref: '#/definitions/auth.RegisterRequest'
       produces:
       - application/json
       responses:
@@ -82,9 +106,10 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties: true
+            additionalProperties:
+              type: string
             type: object
-      summary: Register new user
+      summary: Register new user / Регистрация пользователя
       tags:
       - auth
 swagger: "2.0"

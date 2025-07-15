@@ -17,21 +17,26 @@ const docTemplate = `{
     "paths": {
         "/entries": {
             "get": {
-                "description": "Retrieve all hydration entries for the authenticated user",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all hydration entries for the user / Получить все записи пользователя",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "hydration"
                 ],
-                "summary": "Get user's hydration entries",
+                "summary": "Get all hydration entries / Получить все записи",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/_.HydrationEntry"
+                                "$ref": "#/definitions/hydration.HydrationEntry"
                             }
                         }
                     },
@@ -39,13 +44,29 @@ const docTemplate = `{
                         "description": "Unauthorized",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": true
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
             },
             "post": {
-                "description": "Log a new hydration entry for the authenticated user",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Add a new hydration entry for the user / Добавить новую запись о приёме воды",
                 "consumes": [
                     "application/json"
                 ],
@@ -55,15 +76,15 @@ const docTemplate = `{
                 "tags": [
                     "hydration"
                 ],
-                "summary": "Log water intake",
+                "summary": "Add hydration entry / Добавить запись о приёме воды",
                 "parameters": [
                     {
-                        "description": "Hydration entry data",
-                        "name": "entry",
+                        "description": "Entry data / Данные записи",
+                        "name": "data",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/_.CreateEntryRequest"
+                            "$ref": "#/definitions/hydration.CreateEntryRequest"
                         }
                     }
                 ],
@@ -71,14 +92,34 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/_.HydrationEntry"
+                            "$ref": "#/definitions/hydration.HydrationEntry"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": true
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -86,7 +127,12 @@ const docTemplate = `{
         },
         "/goal": {
             "put": {
-                "description": "Update the daily hydration goal for the authenticated user",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update daily hydration goal for the user / Обновить дневную цель пользователя",
                 "consumes": [
                     "application/json"
                 ],
@@ -96,11 +142,11 @@ const docTemplate = `{
                 "tags": [
                     "hydration"
                 ],
-                "summary": "Update daily goal",
+                "summary": "Update daily goal / Обновить дневную цель",
                 "parameters": [
                     {
-                        "description": "Daily goal in ml",
-                        "name": "goal",
+                        "description": "Goal data / Новая цель",
+                        "name": "data",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -123,7 +169,27 @@ const docTemplate = `{
                         "description": "Bad Request",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": true
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -131,26 +197,42 @@ const docTemplate = `{
         },
         "/stats": {
             "get": {
-                "description": "Get hydration statistics for the authenticated user",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get hydration statistics for the user / Получить статистику пользователя",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "hydration"
                 ],
-                "summary": "Get hydration statistics",
+                "summary": "Get hydration stats / Получить статистику",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/_.HydrationStats"
+                            "$ref": "#/definitions/hydration.HydrationStats"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": true
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -158,7 +240,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "_.CreateEntryRequest": {
+        "hydration.CreateEntryRequest": {
             "type": "object",
             "required": [
                 "amount",
@@ -174,11 +256,10 @@ const docTemplate = `{
                 }
             }
         },
-        "_.HydrationEntry": {
+        "hydration.HydrationEntry": {
             "type": "object",
             "properties": {
                 "amount": {
-                    "description": "in ml",
                     "type": "integer"
                 },
                 "id": {
@@ -188,7 +269,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "type": {
-                    "description": "water, tea, coffee, etc.",
                     "type": "string"
                 },
                 "user_id": {
@@ -196,7 +276,7 @@ const docTemplate = `{
                 }
             }
         },
-        "_.HydrationStats": {
+        "hydration.HydrationStats": {
             "type": "object",
             "properties": {
                 "goal": {
@@ -221,12 +301,12 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.0",
-	Host:             "localhost:8082",
-	BasePath:         "/api/v1",
+	Version:          "",
+	Host:             "",
+	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "Hydration Tracking Service",
-	Description:      "Hydration tracking microservice for logging water intake",
+	Title:            "",
+	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

@@ -1,9 +1,11 @@
-package main
+package hydration
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -11,21 +13,15 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
-	"github.com/swaggo/swag/example/basic/docs"
+	"hydration-tracking/services/auth/docs"
 )
-
-// @title Hydration Tracking Service
-// @version 1.0
-// @description Hydration tracking microservice for logging water intake
-// @host localhost:8082
-// @BasePath /api/v1
 
 type HydrationEntry struct {
 	ID        string    `json:"id"`
 	UserID    string    `json:"user_id"`
-	Amount    int       `json:"amount"` // in ml
+	Amount    int       `json:"amount"`
 	Timestamp time.Time `json:"timestamp"`
-	Type      string    `json:"type"` // water, tea, coffee, etc.
+	Type      string    `json:"type"`
 }
 
 type CreateEntryRequest struct {
@@ -43,8 +39,25 @@ type HydrationStats struct {
 
 var db *sql.DB
 
+func getEnv(key, defaultValue string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return defaultValue
+}
+
 func init() {
-	connStr := "postgres://postgres:password@postgres:5432/hydration_tracking?sslmode=disable"
+	// Load environment variables
+	dbHost := getEnv("DB_HOST", "localhost")
+	dbPort := getEnv("DB_PORT", "5432")
+	dbName := getEnv("DB_NAME", "hydration_tracking")
+	dbUser := getEnv("DB_USER", "postgres")
+	dbPassword := getEnv("DB_PASSWORD", "password")
+	dbSSLMode := getEnv("DB_SSL_MODE", "disable")
+
+	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s",
+		dbUser, dbPassword, dbHost, dbPort, dbName, dbSSLMode)
+	
 	var err error
 	db, err = sql.Open("postgres", connStr)
 	if err != nil {
@@ -82,15 +95,17 @@ func init() {
 	}
 }
 
-// @Summary Log water intake
-// @Description Log a new hydration entry for the authenticated user
-// @Tags hydration
-// @Accept json
-// @Produce json
-// @Param entry body CreateEntryRequest true "Hydration entry data"
-// @Success 201 {object} HydrationEntry
-// @Failure 400 {object} map[string]interface{}
-// @Router /entries [post]
+// CreateEntry godoc
+// @Summary      Add hydration entry / Добавить запись о приёме воды
+// @Description  Add a new hydration entry for the user / Добавить новую запись о приёме воды
+// @Tags         hydration
+// @Accept       json
+// @Produce      json
+// @Param        data  body  CreateEntryRequest  true  "Entry data / Данные записи"
+// @Success      201   {object}  HydrationEntry
+// @Failure      400,401,500   {object}  map[string]string
+// @Security     BearerAuth
+// @Router       /api/v1/entries [post]
 func createEntry(c *gin.Context) {
 	userID := c.GetString("user_id")
 	if userID == "" {
@@ -123,13 +138,15 @@ func createEntry(c *gin.Context) {
 	c.JSON(http.StatusCreated, entry)
 }
 
-// @Summary Get user's hydration entries
-// @Description Retrieve all hydration entries for the authenticated user
-// @Tags hydration
-// @Produce json
-// @Success 200 {array} HydrationEntry
-// @Failure 401 {object} map[string]interface{}
-// @Router /entries [get]
+// GetEntries godoc
+// @Summary      Get all hydration entries / Получить все записи
+// @Description  Get all hydration entries for the user / Получить все записи пользователя
+// @Tags         hydration
+// @Produce      json
+// @Success      200   {array}  HydrationEntry
+// @Failure      401,500   {object}  map[string]string
+// @Security     BearerAuth
+// @Router       /api/v1/entries [get]
 func getEntries(c *gin.Context) {
 	userID := c.GetString("user_id")
 	if userID == "" {
@@ -157,13 +174,15 @@ func getEntries(c *gin.Context) {
 	c.JSON(http.StatusOK, entries)
 }
 
-// @Summary Get hydration statistics
-// @Description Get hydration statistics for the authenticated user
-// @Tags hydration
-// @Produce json
-// @Success 200 {object} HydrationStats
-// @Failure 401 {object} map[string]interface{}
-// @Router /stats [get]
+// GetStats godoc
+// @Summary      Get hydration stats / Получить статистику
+// @Description  Get hydration statistics for the user / Получить статистику пользователя
+// @Tags         hydration
+// @Produce      json
+// @Success      200   {object}  HydrationStats
+// @Failure      401,500   {object}  map[string]string
+// @Security     BearerAuth
+// @Router       /api/v1/stats [get]
 func getStats(c *gin.Context) {
 	userID := c.GetString("user_id")
 	if userID == "" {
@@ -210,9 +229,9 @@ func getStats(c *gin.Context) {
 		totalMonth = 0
 	}
 
-	goalPercentage := 0
+	percent := 0
 	if goal > 0 {
-		goalPercentage = (totalToday * 100) / goal
+		percent = totalToday * 100 / goal
 	}
 
 	stats := HydrationStats{
@@ -220,21 +239,23 @@ func getStats(c *gin.Context) {
 		TotalWeek:      totalWeek,
 		TotalMonth:     totalMonth,
 		Goal:           goal,
-		GoalPercentage: goalPercentage,
+		GoalPercentage: percent,
 	}
 
 	c.JSON(http.StatusOK, stats)
 }
 
-// @Summary Update daily goal
-// @Description Update the daily hydration goal for the authenticated user
-// @Tags hydration
-// @Accept json
-// @Produce json
-// @Param goal body map[string]int true "Daily goal in ml"
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Router /goal [put]
+// UpdateGoal godoc
+// @Summary      Update daily goal / Обновить дневную цель
+// @Description  Update daily hydration goal for the user / Обновить дневную цель пользователя
+// @Tags         hydration
+// @Accept       json
+// @Produce      json
+// @Param        data  body  map[string]int  true  "Goal data / Новая цель"
+// @Success      200   {object}  map[string]interface{}
+// @Failure      400,401,500   {object}  map[string]string
+// @Security     BearerAuth
+// @Router       /api/v1/goal [put]
 func updateGoal(c *gin.Context) {
 	userID := c.GetString("user_id")
 	if userID == "" {
@@ -287,7 +308,7 @@ func authMiddleware() gin.HandlerFunc {
 	}
 }
 
-func main() {
+func StartServer() error {
 	r := gin.Default()
 
 	// Swagger documentation
@@ -310,5 +331,5 @@ func main() {
 	}
 
 	log.Println("Hydration service starting on port 8082")
-	r.Run(":8082")
-}
+	return r.Run(":8082")
+} 

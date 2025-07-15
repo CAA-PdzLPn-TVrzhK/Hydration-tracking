@@ -17,7 +17,7 @@ const docTemplate = `{
     "paths": {
         "/login": {
             "post": {
-                "description": "Authenticate user and return JWT token",
+                "description": "Login user and get JWT / Войти и получить JWT",
                 "consumes": [
                     "application/json"
                 ],
@@ -27,18 +27,62 @@ const docTemplate = `{
                 "tags": [
                     "auth"
                 ],
-                "summary": "Login user",
+                "summary": "Login user / Вход пользователя",
                 "parameters": [
                     {
-                        "description": "Login credentials",
-                        "name": "credentials",
+                        "description": "Login data / Данные для входа",
+                        "name": "data",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/_.LoginRequest"
+                            "$ref": "#/definitions/auth.LoginRequest"
                         }
                     }
                 ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/profile": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get current user profile (JWT required) / Получить профиль по JWT",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Get user profile / Получить профиль пользователя",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -51,7 +95,9 @@ const docTemplate = `{
                         "description": "Unauthorized",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": true
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -59,7 +105,7 @@ const docTemplate = `{
         },
         "/register": {
             "post": {
-                "description": "Register a new user account",
+                "description": "Register a new user / Зарегистрировать нового пользователя",
                 "consumes": [
                     "application/json"
                 ],
@@ -69,15 +115,15 @@ const docTemplate = `{
                 "tags": [
                     "auth"
                 ],
-                "summary": "Register new user",
+                "summary": "Register new user / Регистрация пользователя",
                 "parameters": [
                     {
-                        "description": "User registration data",
-                        "name": "user",
+                        "description": "User data / Данные пользователя",
+                        "name": "data",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/_.RegisterRequest"
+                            "$ref": "#/definitions/auth.RegisterRequest"
                         }
                     }
                 ],
@@ -93,7 +139,9 @@ const docTemplate = `{
                         "description": "Bad Request",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": true
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -101,7 +149,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "_.LoginRequest": {
+        "auth.LoginRequest": {
             "type": "object",
             "required": [
                 "password",
@@ -116,7 +164,7 @@ const docTemplate = `{
                 }
             }
         },
-        "_.RegisterRequest": {
+        "auth.RegisterRequest": {
             "type": "object",
             "required": [
                 "email",
@@ -141,12 +189,12 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.0",
-	Host:             "localhost:8081",
-	BasePath:         "/api/v1",
+	Version:          "",
+	Host:             "",
+	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "Hydration Tracking Auth Service",
-	Description:      "Authentication and Authorization microservice for Hydration Tracking",
+	Title:            "",
+	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",
