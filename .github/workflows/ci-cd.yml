@@ -98,13 +98,16 @@ jobs:
         registry: ${{ env.REGISTRY }}
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Set lowercased image name
+      id: image_name
+      run: echo "IMAGE_NAME_LOWER=$(echo $IMAGE_NAME | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
     - name: Build and push Auth Service
       uses: docker/build-push-action@v5
       with:
         context: ./backend
         file: ./backend/Dockerfile.auth
         push: true
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/auth-service:${{ github.sha }}
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}/auth-service:${{ github.sha }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
     - name: Build and push Hydration Service
@@ -113,7 +116,7 @@ jobs:
         context: ./backend
         file: ./backend/Dockerfile.hydration
         push: true
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/hydration-service:${{ github.sha }}
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}/hydration-service:${{ github.sha }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
     - name: Build and push Notification Service
@@ -122,7 +125,7 @@ jobs:
         context: ./backend
         file: ./backend/Dockerfile.notification
         push: true
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/notification-service:${{ github.sha }}
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}/notification-service:${{ github.sha }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
     - name: Build and push Flutter Web
@@ -131,7 +134,7 @@ jobs:
         context: ./frontend
         file: ./frontend/Dockerfile.web
         push: true
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/flutter-web:${{ github.sha }}
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}/flutter-web:${{ github.sha }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
   deploy:
