@@ -63,6 +63,14 @@ jobs:
       with:
         flutter-version: '3.19.0'
         channel: 'stable'
+    - name: Upgrade Flutter
+      run: flutter upgrade
+    - name: Check Flutter and Dart version
+      run: |
+        flutter --version
+        dart --version
+    - name: Clean pub cache
+      run: flutter pub cache repair
     - name: Install dependencies
       run: |
         cd frontend
