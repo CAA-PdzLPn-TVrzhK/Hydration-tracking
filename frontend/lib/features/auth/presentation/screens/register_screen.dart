@@ -71,7 +71,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   controller: _passwordController,
                   validator: (v) =>
                   v != null && v.length >= 6 ? null : 'Минимум 6 символов',
-                  onSaved: (v) => _password = v ?? '',
                 ),
                 const SizedBox(height: 16),
                 TextFormField(

@@ -208,12 +208,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           return ListTile(
                             leading: CircleAvatar(
                               backgroundColor:
-                                  AppTheme.primaryBlue.withValues(
-                                    AppTheme.primaryBlue.red,
-                                    AppTheme.primaryBlue.green,
-                                    AppTheme.primaryBlue.blue,
-                                    (0.1 * 255).toInt(),
-                                  ),
+                                  AppTheme.primaryBlue.withAlpha((0.1 * 255).toInt()),
                               child: const Icon(
                                 Icons.water_drop,
                                 color: AppTheme.primaryBlue,
