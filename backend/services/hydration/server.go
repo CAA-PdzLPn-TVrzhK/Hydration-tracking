@@ -290,10 +290,6 @@ func authMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		if len(tokenString) > 7 && tokenString[:7] == "Bearer " {
-			tokenString = tokenString[7:]
-		}
-
 		// In a real implementation, you would validate the JWT token here
 		// For now, we'll extract user_id from a simple header
 		userID := c.GetHeader("X-User-ID")

@@ -12,7 +12,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   String _email = '';
-  String _password = '';
   bool _loading = false;
   String? _error;
 
@@ -72,7 +71,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   controller: _passwordController,
                   validator: (v) =>
                   v != null && v.length >= 6 ? null : 'Минимум 6 символов',
-                  onSaved: (v) => _password = v ?? '',
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
