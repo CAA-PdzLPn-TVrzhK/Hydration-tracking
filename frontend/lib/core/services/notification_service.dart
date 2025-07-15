@@ -28,7 +28,7 @@ class NotificationService {
   }
 
   static void _onNotificationTapped(NotificationResponse response) {
-    print('Notification tapped: ${response.payload}');
+    debugPrint('Notification tapped: ${response.payload}');
   }
 
   // --- Методы с Time закомментированы, чтобы не было ошибок на web ---

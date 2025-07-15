@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hydration_tracker/core/theme/app_theme.dart';
 import 'package:hydration_tracker/core/theme/theme_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
