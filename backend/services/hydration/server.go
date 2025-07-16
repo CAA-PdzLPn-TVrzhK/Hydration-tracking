@@ -1,5 +1,9 @@
 package hydration
 
+// @SecurityDefinitions.apikey BearerAuth
+// @In header
+// @Name Authorization
+
 import (
 	"database/sql"
 	"fmt"
@@ -8,36 +12,60 @@ import (
 	"os"
 	"time"
 
+	"hydration-tracking/services/hydration/docs"
+
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	_ "github.com/lib/pq"
-	"github.com/swaggo/files"
-	"github.com/swaggo/gin-swagger"
-	"hydration-tracking/services/auth/docs"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 type HydrationEntry struct {
-	ID        string    `json:"id"`
-	UserID    string    `json:"user_id"`
-	Amount    int       `json:"amount"`
-	Timestamp time.Time `json:"timestamp"`
-	Type      string    `json:"type"`
+	ID        string    `json:"id" example:"550e8400-e29b-41d4-a716-446655440000"`
+	UserID    string    `json:"user_id" example:"550e8400-e29b-41d4-a716-446655440000"`
+	Amount    int       `json:"amount" example:"250"`
+	Timestamp time.Time `json:"timestamp" example:"2024-01-15T10:30:00Z"`
+	Type      string    `json:"type" example:"water"`
 }
 
 type CreateEntryRequest struct {
-	Amount int    `json:"amount" binding:"required,min=1"`
-	Type   string `json:"type" binding:"required"`
+	Amount int    `json:"amount" binding:"required,min=1" example:"250"`
+	Type   string `json:"type" binding:"required" example:"water"`
+}
+
+type UpdateGoalRequest struct {
+	Goal int `json:"goal" binding:"required,min=1" example:"2000"`
 }
 
 type HydrationStats struct {
-	TotalToday     int `json:"total_today"`
-	TotalWeek      int `json:"total_week"`
-	TotalMonth     int `json:"total_month"`
-	Goal           int `json:"goal"`
-	GoalPercentage int `json:"goal_percentage"`
+	TotalToday     int `json:"total_today" example:"1500"`
+	TotalWeek      int `json:"total_week" example:"10500"`
+	TotalMonth     int `json:"total_month" example:"45000"`
+	Goal           int `json:"goal" example:"2000"`
+	GoalPercentage int `json:"goal_percentage" example:"75"`
 }
 
-var db *sql.DB
+type ErrorResponse struct {
+	Error string `json:"error" example:"Invalid input data"`
+}
+
+type UpdateGoalResponse struct {
+	Message string `json:"message" example:"Goal updated successfully"`
+	Goal    int    `json:"goal" example:"2000"`
+}
+
+type Claims struct {
+	UserID   string `json:"user_id"`
+	Username string `json:"username"`
+	jwt.RegisteredClaims
+}
+
+var (
+	db     *sql.DB
+	secret = []byte("your-secret-key")
+)
 
 func getEnv(key, defaultValue string) string {
 	if value := os.Getenv(key); value != "" {
@@ -46,7 +74,7 @@ func getEnv(key, defaultValue string) string {
 	return defaultValue
 }
 
-func init() {
+func InitDB() {
 	// Load environment variables
 	dbHost := getEnv("DB_HOST", "localhost")
 	dbPort := getEnv("DB_PORT", "5432")
@@ -57,7 +85,7 @@ func init() {
 
 	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s",
 		dbUser, dbPassword, dbHost, dbPort, dbName, dbSSLMode)
-	
+
 	var err error
 	db, err = sql.Open("postgres", connStr)
 	if err != nil {
@@ -102,20 +130,22 @@ func init() {
 // @Accept       json
 // @Produce      json
 // @Param        data  body  CreateEntryRequest  true  "Entry data / Данные записи"
-// @Success      201   {object}  HydrationEntry
-// @Failure      400,401,500   {object}  map[string]string
+// @Success      201   {object}  HydrationEntry  "Entry created successfully"
+// @Failure      400   {object}  ErrorResponse  "Bad Request - Invalid input"
+// @Failure      401   {object}  ErrorResponse  "Unauthorized - Invalid token"
+// @Failure      500   {object}  ErrorResponse  "Internal Server Error"
 // @Security     BearerAuth
 // @Router       /api/v1/entries [post]
 func createEntry(c *gin.Context) {
 	userID := c.GetString("user_id")
 	if userID == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		c.JSON(http.StatusUnauthorized, ErrorResponse{Error: "User not authenticated"})
 		return
 	}
 
 	var req CreateEntryRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, ErrorResponse{Error: err.Error()})
 		return
 	}
 
@@ -131,7 +161,7 @@ func createEntry(c *gin.Context) {
 	_, err := db.Exec("INSERT INTO hydration_entries (id, user_id, amount, type) VALUES ($1, $2, $3, $4)",
 		entry.ID, entry.UserID, entry.Amount, entry.Type)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create entry"})
+		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: "Failed to create entry"})
 		return
 	}
 
@@ -143,20 +173,21 @@ func createEntry(c *gin.Context) {
 // @Description  Get all hydration entries for the user / Получить все записи пользователя
 // @Tags         hydration
 // @Produce      json
-// @Success      200   {array}  HydrationEntry
-// @Failure      401,500   {object}  map[string]string
+// @Success      200   {array}  HydrationEntry  "List of hydration entries"
+// @Failure      401   {object}  ErrorResponse  "Unauthorized - Invalid token"
+// @Failure      500   {object}  ErrorResponse  "Internal Server Error"
 // @Security     BearerAuth
 // @Router       /api/v1/entries [get]
 func getEntries(c *gin.Context) {
 	userID := c.GetString("user_id")
 	if userID == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		c.JSON(http.StatusUnauthorized, ErrorResponse{Error: "User not authenticated"})
 		return
 	}
 
 	rows, err := db.Query("SELECT id, user_id, amount, timestamp, type FROM hydration_entries WHERE user_id = $1 ORDER BY timestamp DESC", userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch entries"})
+		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: "Failed to fetch entries"})
 		return
 	}
 	defer rows.Close()
@@ -179,14 +210,15 @@ func getEntries(c *gin.Context) {
 // @Description  Get hydration statistics for the user / Получить статистику пользователя
 // @Tags         hydration
 // @Produce      json
-// @Success      200   {object}  HydrationStats
-// @Failure      401,500   {object}  map[string]string
+// @Success      200   {object}  HydrationStats  "Hydration statistics"
+// @Failure      401   {object}  ErrorResponse  "Unauthorized - Invalid token"
+// @Failure      500   {object}  ErrorResponse  "Internal Server Error"
 // @Security     BearerAuth
 // @Router       /api/v1/stats [get]
 func getStats(c *gin.Context) {
 	userID := c.GetString("user_id")
 	if userID == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		c.JSON(http.StatusUnauthorized, ErrorResponse{Error: "User not authenticated"})
 		return
 	}
 
@@ -251,41 +283,41 @@ func getStats(c *gin.Context) {
 // @Tags         hydration
 // @Accept       json
 // @Produce      json
-// @Param        data  body  map[string]int  true  "Goal data / Новая цель"
-// @Success      200   {object}  map[string]interface{}
-// @Failure      400,401,500   {object}  map[string]string
+// @Param        data  body  UpdateGoalRequest  true  "Goal data / Новая цель"
+// @Success      200   {object}  UpdateGoalResponse  "Goal updated successfully"
+// @Failure      400   {object}  ErrorResponse  "Bad Request - Invalid input"
+// @Failure      401   {object}  ErrorResponse  "Unauthorized - Invalid token"
+// @Failure      500   {object}  ErrorResponse  "Internal Server Error"
 // @Security     BearerAuth
 // @Router       /api/v1/goal [put]
 func updateGoal(c *gin.Context) {
 	userID := c.GetString("user_id")
 	if userID == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		c.JSON(http.StatusUnauthorized, ErrorResponse{Error: "User not authenticated"})
 		return
 	}
 
-	var req struct {
-		Goal int `json:"goal" binding:"required,min=1"`
-	}
+	var req UpdateGoalRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, ErrorResponse{Error: err.Error()})
 		return
 	}
 
 	_, err := db.Exec("INSERT INTO user_goals (user_id, daily_goal) VALUES ($1, $2) ON CONFLICT (user_id) DO UPDATE SET daily_goal = $2, updated_at = CURRENT_TIMESTAMP",
 		userID, req.Goal)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update goal"})
+		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: "Failed to update goal"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Goal updated successfully", "goal": req.Goal})
+	c.JSON(http.StatusOK, UpdateGoalResponse{Message: "Goal updated successfully", Goal: req.Goal})
 }
 
 func authMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenString := c.GetHeader("Authorization")
 		if tokenString == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header required"})
+			c.JSON(http.StatusUnauthorized, ErrorResponse{Error: "Authorization header required"})
 			c.Abort()
 			return
 		}
@@ -294,16 +326,19 @@ func authMiddleware() gin.HandlerFunc {
 			tokenString = tokenString[7:]
 		}
 
-		// In a real implementation, you would validate the JWT token here
-		// For now, we'll extract user_id from a simple header
-		userID := c.GetHeader("X-User-ID")
-		if userID == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID required"})
+		token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+			return secret, nil
+		})
+
+		if err != nil || !token.Valid {
+			c.JSON(http.StatusUnauthorized, ErrorResponse{Error: "Invalid token"})
 			c.Abort()
 			return
 		}
 
-		c.Set("user_id", userID)
+		claims := token.Claims.(*Claims)
+		c.Set("user_id", claims.UserID)
+		c.Set("username", claims.Username)
 		c.Next()
 	}
 }
@@ -316,7 +351,7 @@ func StartServer() error {
 	docs.SwaggerInfo.Description = "Hydration tracking microservice"
 	docs.SwaggerInfo.Version = "1.0"
 	docs.SwaggerInfo.Host = "localhost:8082"
-	docs.SwaggerInfo.BasePath = "/api/v1"
+	docs.SwaggerInfo.BasePath = ""
 	docs.SwaggerInfo.Schemes = []string{"http"}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -332,4 +367,4 @@ func StartServer() error {
 
 	log.Println("Hydration service starting on port 8082")
 	return r.Run(":8082")
-} 
+}

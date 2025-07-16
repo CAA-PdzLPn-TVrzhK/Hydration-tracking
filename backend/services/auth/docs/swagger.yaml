@@ -1,32 +1,72 @@
 definitions:
+  auth.ErrorResponse:
+    properties:
+      error:
+        example: Invalid credentials
+        type: string
+    type: object
   auth.LoginRequest:
     properties:
       password:
+        example: password123
         type: string
       username:
+        example: john_doe
         type: string
     required:
     - password
     - username
     type: object
+  auth.LoginResponse:
+    properties:
+      token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+      user:
+        $ref: '#/definitions/auth.UserInfo'
+    type: object
   auth.RegisterRequest:
     properties:
       email:
+        example: john@example.com
         type: string
       password:
+        example: password123
         minLength: 6
         type: string
       username:
+        example: john_doe
         type: string
     required:
     - email
     - password
     - username
     type: object
+  auth.RegisterResponse:
+    properties:
+      message:
+        example: User registered successfully
+        type: string
+      user_id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+    type: object
+  auth.UserInfo:
+    properties:
+      email:
+        example: john@example.com
+        type: string
+      id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      username:
+        example: john_doe
+        type: string
+    type: object
 info:
   contact: {}
 paths:
-  /login:
+  /api/v1/login:
     post:
       consumes:
       - application/json
@@ -44,24 +84,19 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/auth.LoginResponse'
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/auth.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/auth.ErrorResponse'
       summary: Login user / Вход пользователя
       tags:
       - auth
-  /profile:
+  /api/v1/profile:
     get:
       description: Get current user profile (JWT required) / Получить профиль по JWT
       produces:
@@ -83,7 +118,7 @@ paths:
       summary: Get user profile / Получить профиль пользователя
       tags:
       - auth
-  /register:
+  /api/v1/register:
     post:
       consumes:
       - application/json
@@ -101,15 +136,17 @@ paths:
         "201":
           description: Created
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/auth.RegisterResponse'
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/auth.ErrorResponse'
       summary: Register new user / Регистрация пользователя
       tags:
       - auth
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

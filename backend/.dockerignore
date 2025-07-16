@@ -1,0 +1,5 @@
+auth-service
+hydration-service
+*.exe
+*.out
+*.log 
