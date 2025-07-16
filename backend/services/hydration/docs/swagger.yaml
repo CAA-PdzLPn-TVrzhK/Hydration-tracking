@@ -2,67 +2,99 @@ definitions:
   hydration.CreateEntryRequest:
     properties:
       amount:
+        example: 250
         minimum: 1
         type: integer
       type:
+        example: water
         type: string
     required:
     - amount
     - type
     type: object
+  hydration.ErrorResponse:
+    properties:
+      error:
+        example: Invalid input data
+        type: string
+    type: object
   hydration.HydrationEntry:
     properties:
       amount:
+        example: 250
         type: integer
       id:
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       timestamp:
+        example: "2024-01-15T10:30:00Z"
         type: string
       type:
+        example: water
         type: string
       user_id:
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
     type: object
   hydration.HydrationStats:
     properties:
       goal:
+        example: 2000
         type: integer
       goal_percentage:
+        example: 75
         type: integer
       total_month:
+        example: 45000
         type: integer
       total_today:
+        example: 1500
         type: integer
       total_week:
+        example: 10500
         type: integer
+    type: object
+  hydration.UpdateGoalRequest:
+    properties:
+      goal:
+        example: 2000
+        minimum: 1
+        type: integer
+    required:
+    - goal
+    type: object
+  hydration.UpdateGoalResponse:
+    properties:
+      goal:
+        example: 2000
+        type: integer
+      message:
+        example: Goal updated successfully
+        type: string
     type: object
 info:
   contact: {}
 paths:
-  /entries:
+  /api/v1/entries:
     get:
       description: Get all hydration entries for the user / Получить все записи пользователя
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: List of hydration entries
           schema:
             items:
               $ref: '#/definitions/hydration.HydrationEntry'
             type: array
         "401":
-          description: Unauthorized
+          description: Unauthorized - Invalid token
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/hydration.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/hydration.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get all hydration entries / Получить все записи
@@ -84,33 +116,27 @@ paths:
       - application/json
       responses:
         "201":
-          description: Created
+          description: Entry created successfully
           schema:
             $ref: '#/definitions/hydration.HydrationEntry'
         "400":
-          description: Bad Request
+          description: Bad Request - Invalid input
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/hydration.ErrorResponse'
         "401":
-          description: Unauthorized
+          description: Unauthorized - Invalid token
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/hydration.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/hydration.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Add hydration entry / Добавить запись о приёме воды
       tags:
       - hydration
-  /goal:
+  /api/v1/goal:
     put:
       consumes:
       - application/json
@@ -122,65 +148,57 @@ paths:
         name: data
         required: true
         schema:
-          additionalProperties:
-            type: integer
-          type: object
+          $ref: '#/definitions/hydration.UpdateGoalRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Goal updated successfully
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/hydration.UpdateGoalResponse'
         "400":
-          description: Bad Request
+          description: Bad Request - Invalid input
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/hydration.ErrorResponse'
         "401":
-          description: Unauthorized
+          description: Unauthorized - Invalid token
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/hydration.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/hydration.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Update daily goal / Обновить дневную цель
       tags:
       - hydration
-  /stats:
+  /api/v1/stats:
     get:
       description: Get hydration statistics for the user / Получить статистику пользователя
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Hydration statistics
           schema:
             $ref: '#/definitions/hydration.HydrationStats'
         "401":
-          description: Unauthorized
+          description: Unauthorized - Invalid token
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/hydration.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/hydration.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get hydration stats / Получить статистику
       tags:
       - hydration
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

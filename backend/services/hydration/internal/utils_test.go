@@ -22,10 +22,18 @@ func TestValidateEntry(t *testing.T) {
 
 func TestCalculateStats(t *testing.T) {
 	now := time.Now()
+
+	// Создаём записи с точными датами
+	todayEntry := HydrationEntry{Amount: 200, Timestamp: now}
+	twoDaysAgo := now.AddDate(0, 0, -2)
+	twoDaysAgoEntry := HydrationEntry{Amount: 300, Timestamp: twoDaysAgo}
+	tenDaysAgo := now.AddDate(0, 0, -10)
+	tenDaysAgoEntry := HydrationEntry{Amount: 400, Timestamp: tenDaysAgo}
+
 	entries := []HydrationEntry{
-		{Amount: 200, Timestamp: now.Add(-1 * time.Hour)},       // сегодня
-		{Amount: 300, Timestamp: now.Add(-2 * 24 * time.Hour)},  // 2 дня назад
-		{Amount: 400, Timestamp: now.Add(-10 * 24 * time.Hour)}, // 10 дней назад
+		todayEntry,      // сегодня
+		twoDaysAgoEntry, // 2 дня назад
+		tenDaysAgoEntry, // 10 дней назад
 	}
 	goal := 1000
 	stats := CalculateStats(entries, goal)
@@ -33,15 +41,18 @@ func TestCalculateStats(t *testing.T) {
 	if stats.TotalToday != 200 {
 		t.Errorf("TotalToday = %d, want 200", stats.TotalToday)
 	}
+	// Записи за последние 7 дней: 200 (сегодня) + 300 (2 дня назад) = 500
 	if stats.TotalWeek != 500 {
 		t.Errorf("TotalWeek = %d, want 500", stats.TotalWeek)
 	}
+	// Записи за последний месяц: 200 + 300 + 400 = 900
 	if stats.TotalMonth != 900 {
 		t.Errorf("TotalMonth = %d, want 900", stats.TotalMonth)
 	}
 	if stats.Goal != goal {
 		t.Errorf("Goal = %d, want %d", stats.Goal, goal)
 	}
+	// GoalPercentage = (200 / 1000) * 100 = 20
 	if stats.GoalPercentage != 20 {
 		t.Errorf("GoalPercentage = %d, want 20", stats.GoalPercentage)
 	}
