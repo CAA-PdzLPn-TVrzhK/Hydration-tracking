@@ -1,5 +1,6 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz;
+import 'package:flutter/foundation.dart';
 // import 'package:flutter/material.dart'; // Для TimeOfDay, если потребуется
 
 class NotificationService {
@@ -28,7 +29,7 @@ class NotificationService {
   }
 
   static void _onNotificationTapped(NotificationResponse response) {
-    print('Notification tapped: ${response.payload}');
+    debugPrint('Notification tapped: ${response.payload}');
   }
 
   // --- Методы с Time закомментированы, чтобы не было ошибок на web ---
