@@ -53,7 +53,6 @@ class DashboardNotifier extends StateNotifier<AsyncValue<DashboardData>> {
       state = AsyncValue.data(data);
     } catch (error) {
       // If API fails, use mock data and log error
-      print('Dashboard data loading error: $error');
       state = AsyncValue.data(DashboardData.mock());
     }
   }

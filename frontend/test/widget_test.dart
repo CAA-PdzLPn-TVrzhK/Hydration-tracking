@@ -14,42 +14,44 @@ import 'package:hydration_tracker/l10n/app_localizations.dart';
 void main() {
   testWidgets('Onboarding screen shows welcome text (ru)', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: const [
+      const MaterialApp(
+        localizationsDelegates: [
           AppLocalizations.delegate,
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        supportedLocales: const [
+        supportedLocales: [
           Locale('en'),
           Locale('ru'),
         ],
-        locale: const Locale('ru'),
-        home: const OnboardingScreen(),
+        locale: Locale('ru'),
+        home: OnboardingScreen(),
       ),
     );
+    await tester.pumpAndSettle();
     final welcomeText = AppLocalizations.of(tester.element(find.byType(OnboardingScreen)))!.welcome;
     expect(find.text(welcomeText), findsOneWidget);
   });
 
   testWidgets('Onboarding screen shows welcome text (en)', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: const [
+      const MaterialApp(
+        localizationsDelegates: [
           AppLocalizations.delegate,
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        supportedLocales: const [
+        supportedLocales: [
           Locale('en'),
           Locale('ru'),
         ],
-        locale: const Locale('en'),
-        home: const OnboardingScreen(),
+        locale: Locale('en'),
+        home: OnboardingScreen(),
       ),
     );
+    await tester.pumpAndSettle();
     final welcomeText = AppLocalizations.of(tester.element(find.byType(OnboardingScreen)))!.welcome;
     expect(find.text(welcomeText), findsOneWidget);
   });

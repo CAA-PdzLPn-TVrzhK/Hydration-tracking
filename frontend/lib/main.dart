@@ -11,7 +11,6 @@ import 'package:hydration_tracker/core/services/storage_service.dart';
 import 'package:hydration_tracker/core/services/api_service.dart';
 import 'package:hydration_tracker/features/auth/presentation/providers/auth_provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:intl/intl.dart';
 import 'package:hydration_tracker/core/providers/language_provider.dart';
 
 void main() async {

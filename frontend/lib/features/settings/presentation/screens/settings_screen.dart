@@ -4,10 +4,6 @@ import 'package:hydration_tracker/core/theme/theme_provider.dart';
 import 'package:hydration_tracker/core/services/api_service.dart';
 import 'package:hydration_tracker/features/auth/presentation/providers/auth_provider.dart';
 import 'package:hydration_tracker/core/providers/language_provider.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:hydration_tracker/features/onboarding/presentation/screens/onboarding_screen.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:hydration_tracker/l10n/app_localizations.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -15,7 +11,6 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeProvider);
-    final authState = ref.watch(authProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -345,29 +340,4 @@ class SettingsScreen extends ConsumerWidget {
       },
     );
   }
-}
-
-void main() {
-  testWidgets('Onboarding screen shows welcome text', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: const [
-          Locale('en'),
-          Locale('ru'),
-        ],
-        locale: const Locale('ru'), // или 'en', если тестируешь английский
-        home: const OnboardingScreen(),
-      ),
-    );
-
-    // Используй локализованный текст
-    final welcomeText = AppLocalizations.of(tester.element(find.byType(OnboardingScreen)))!.welcome;
-    expect(find.text(welcomeText), findsOneWidget);
-  });
 }
