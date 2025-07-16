@@ -6,7 +6,7 @@ class OnboardingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context)!;
+    final loc = AppLocalizations.of(context);
     return Scaffold(
       body: Center(
         child: Padding(
@@ -15,22 +15,24 @@ class OnboardingScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                loc.welcome,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                loc?.welcome ?? 'Welcome',
+                style:
+                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
               Text(
-                loc.onboardingDesc,
-                style: const TextStyle(fontSize: 16),
+                loc?.onboardingDesc ?? 'Onboarding Description',
+                style:   const TextStyle(fontSize: 16),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 40),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () => Navigator.pushReplacementNamed(context, '/login'),
-                  child: Text(loc.start),
+                  onPressed: () =>
+                      Navigator.pushReplacementNamed(context, '/login'),
+                  child: Text(loc?.start ?? 'Start'),
                 ),
               ),
             ],
@@ -39,4 +41,4 @@ class OnboardingScreen extends StatelessWidget {
       ),
     );
   }
-} 
+}

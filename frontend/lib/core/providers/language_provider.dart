@@ -12,7 +12,7 @@ class LanguageNotifier extends StateNotifier<Locale> {
   }
 
   Future<void> _loadLanguage() async {
-    final code = StorageService.getLanguage();
+    final code = await StorageService.getLanguage();
     if (code != null) {
       state = Locale(code);
     }
@@ -22,4 +22,4 @@ class LanguageNotifier extends StateNotifier<Locale> {
     state = locale;
     await StorageService.saveLanguage(locale.languageCode);
   }
-} 
+}
