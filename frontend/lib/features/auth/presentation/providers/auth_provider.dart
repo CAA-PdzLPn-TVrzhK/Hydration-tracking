@@ -26,14 +26,17 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }) async {
     state = state.copyWith(isLoading: true, error: null);
 
-    // Проверка на тестовый аккаунт
-    if (username == 'testuser' && password == 'testpass') {
+    // Квалифицированная проверка на тестовый аккаунт
+    const String testUsername = 'testuser';
+    const String testPassword = 'testpass';
+    if (username.trim() == testUsername && password == testPassword) {
+      // Локальная авторизация тестового пользователя
       state = state.copyWith(
         isAuthenticated: true,
         isLoading: false,
         user: User(
           id: 'test-id',
-          username: 'testuser',
+          username: testUsername,
           email: 'testuser@example.com',
         ),
       );
