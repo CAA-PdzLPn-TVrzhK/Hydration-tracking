@@ -185,11 +185,47 @@ abstract class AppLocalizations {
   /// **'Today Drank'**
   String get todayDrank;
 
+  /// No description provided for @drankOfGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'{current} ml of {goal} ml'**
+  String drankOfGoal(Object current, Object goal);
+
   /// No description provided for @progress.
   ///
   /// In en, this message translates to:
-  /// **'Progress'**
-  String get progress;
+  /// **'Progress: {percent}%'**
+  String progress(Object percent);
+
+  /// No description provided for @percent.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}%'**
+  String percent(Object percent);
+
+  /// No description provided for @waterType.
+  ///
+  /// In en, this message translates to:
+  /// **'water'**
+  String get waterType;
+
+  /// No description provided for @now.
+  ///
+  /// In en, this message translates to:
+  /// **'now'**
+  String get now;
+
+  /// No description provided for @minAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min ago'**
+  String minAgo(Object minutes);
+
+  /// No description provided for @hAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h ago'**
+  String hAgo(Object hours);
 
   /// No description provided for @addWaterIntake.
   ///
@@ -352,6 +388,174 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No entries yet'**
   String get noEntriesYet;
+
+  /// No description provided for @personalData.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Data'**
+  String get personalData;
+
+  /// No description provided for @waterReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Water reminders'**
+  String get waterReminders;
+
+  /// No description provided for @checkConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Check connection'**
+  String get checkConnection;
+
+  /// No description provided for @version.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get version;
+
+  /// No description provided for @goalFeatureComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily goal feature will be added in the next update.'**
+  String get goalFeatureComingSoon;
+
+  /// No description provided for @notificationsFeatureComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification settings will be added in the next update.'**
+  String get notificationsFeatureComingSoon;
+
+  /// No description provided for @profileFeatureComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile editing will be added in the next update.'**
+  String get profileFeatureComingSoon;
+
+  /// No description provided for @checkingConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking connection...'**
+  String get checkingConnection;
+
+  /// No description provided for @apiAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'API available'**
+  String get apiAvailable;
+
+  /// No description provided for @apiUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'API unavailable'**
+  String get apiUnavailable;
+
+  /// No description provided for @makeSureBackendRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Make sure the backend is running on ports 8081 and 8082'**
+  String get makeSureBackendRunning;
+
+  /// No description provided for @aboutAppDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'An app for tracking your water intake'**
+  String get aboutAppDesc;
+
+  /// No description provided for @logoutConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to log out?'**
+  String get logoutConfirm;
+
+  /// No description provided for @dashboardLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading dashboard'**
+  String get dashboardLoadError;
+
+  /// No description provided for @weeklyProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly Progress'**
+  String get weeklyProgress;
+
+  /// No description provided for @waterChartStub.
+  ///
+  /// In en, this message translates to:
+  /// **'Water chart (stub)'**
+  String get waterChartStub;
+
+  /// No description provided for @repeatPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat Password'**
+  String get repeatPassword;
+
+  /// No description provided for @passwordsDontMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get passwordsDontMatch;
+
+  /// No description provided for @alreadyHaveAccountLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account? Login'**
+  String get alreadyHaveAccountLogin;
+
+  /// No description provided for @noAccountRegister.
+  ///
+  /// In en, this message translates to:
+  /// **'No account? Register'**
+  String get noAccountRegister;
+
+  /// No description provided for @ml.
+  ///
+  /// In en, this message translates to:
+  /// **'ml'**
+  String get ml;
+
+  /// No description provided for @platformInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform: {platform}'**
+  String platformInfo(Object platform);
+
+  /// No description provided for @authApiInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Auth API: {url}'**
+  String authApiInfo(Object url);
+
+  /// No description provided for @hydrationApiInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Hydration API: {url}'**
+  String hydrationApiInfo(Object url);
+
+  /// No description provided for @enterValidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email'**
+  String get enterValidEmail;
+
+  /// No description provided for @minutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'min ago'**
+  String get minutesAgo;
+
+  /// No description provided for @hoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'h ago'**
+  String get hoursAgo;
+
+  /// No description provided for @teaType.
+  ///
+  /// In en, this message translates to:
+  /// **'tea'**
+  String get teaType;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

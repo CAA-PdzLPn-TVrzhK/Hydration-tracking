@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hydration_tracker/features/auth/presentation/providers/auth_provider.dart';
+import 'package:hydration_tracker/l10n/app_localizations.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -51,7 +52,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Регистрация')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.register)),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -62,49 +63,49 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               children: [
                 TextFormField(
                   controller: _usernameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Имя пользователя',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.username,
+                    border: const OutlineInputBorder(),
                   ),
                   validator: (v) => v != null && v.trim().isNotEmpty 
                       ? null 
-                      : 'Введите имя пользователя',
+                      : AppLocalizations.of(context)!.enterUsername,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.email,
+                    border: const OutlineInputBorder(),
                   ),
                   keyboardType: TextInputType.emailAddress,
                   validator: (v) => v != null && v.contains('@') 
                       ? null 
-                      : 'Введите корректный email',
+                      : AppLocalizations.of(context)!.enterValidEmail,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _passwordController,
-                  decoration: const InputDecoration(
-                    labelText: 'Пароль',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.password,
+                    border: const OutlineInputBorder(),
                   ),
                   obscureText: true,
                   validator: (v) => v != null && v.length >= 6 
                       ? null 
-                      : 'Минимум 6 символов',
+                      : AppLocalizations.of(context)!.min6chars,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _confirmPasswordController,
-                  decoration: const InputDecoration(
-                    labelText: 'Повторите пароль',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.repeatPassword,
+                    border: const OutlineInputBorder(),
                   ),
                   obscureText: true,
                   validator: (v) => v == _passwordController.text
                       ? null
-                      : 'Пароли не совпадают',
+                      : AppLocalizations.of(context)!.passwordsDontMatch,
                 ),
                 const SizedBox(height: 24),
                 if (authState.error != null)
@@ -129,7 +130,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             width: 20,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('Зарегистрироваться'),
+                        : Text(AppLocalizations.of(context)!.register),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -137,7 +138,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   onPressed: authState.isLoading
                       ? null
                       : () => Navigator.pushReplacementNamed(context, '/login'),
-                  child: const Text('Уже есть аккаунт? Войти'),
+                  child: Text(AppLocalizations.of(context)!.alreadyHaveAccountLogin),
                 ),
               ],
             ),
