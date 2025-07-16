@@ -2,16 +2,19 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, backend, frontend ]
   pull_request:
     branches: [ main ]
+
+permissions:
+  contents: read
+  security-events: write
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  # Backend Tests
   backend-tests:
     runs-on: ubuntu-latest
     services:
@@ -27,156 +30,130 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
         go-version: '1.21'
-
     - name: Install dependencies
       run: |
         cd backend
         go mod download
-
+    - name: Install golangci-lint
+      run: |
+        go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+    - name: Run golangci-lint
+      run: |
+        cd backend
+        golangci-lint run --timeout=5m ./...
     - name: Run backend tests
       run: |
         cd backend
         go test -v ./services/auth/internal
         go test -v ./services/hydration/internal
-
-    - name: Install golangci-lint
-      uses: golangci/golangci-lint-action@v4
-      with:
-        version: v1.55.2
-
-    - name: Install golangci-lint
-      uses: golangci/golangci-lint-action@v6
-      with:
-        version: latest
-        args: --timeout=5m
-
-  # Frontend Tests
   frontend-tests:
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.16.0'
+        flutter-version: '3.19.0'
         channel: 'stable'
-
+    - name: Upgrade Flutter
+      run: flutter upgrade
+    - name: Check Flutter and Dart version
+      run: |
+        flutter --version
+        dart --version
+    - name: Clean pub cache
+      run: flutter pub cache repair
     - name: Install dependencies
       run: |
         cd frontend
         flutter pub get
-
     - name: Run Flutter tests
       run: |
         cd frontend
         flutter test
-
     - name: Run Flutter analyze
       run: |
         cd frontend
         flutter analyze
-
-  # Build and Push Docker Images
   build-images:
     needs: [backend-tests, frontend-tests]
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-
+    if: github.event_name == 'push'
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
-
-    - name: Log in to Container Registry
-      uses: docker/login-action@v3
-      with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Build and push Auth Service
+    # - name: Log in to Container Registry
+    #   uses: docker/login-action@v3
+    #   with:
+    #     registry: ${{ env.REGISTRY }}
+    #     username: ${{ github.actor }}
+    #     password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Set lowercased image name
+      run: echo "IMAGE_NAME_LOWER=$(echo $IMAGE_NAME | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+    - name: Build Auth Service
       uses: docker/build-push-action@v5
       with:
         context: ./backend
         file: ./backend/Dockerfile.auth
-        push: true
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/auth-service:${{ github.sha }}
+        push: false
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}/auth-service:${{ github.sha }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
-
-    - name: Build and push Hydration Service
+    - name: Build Hydration Service
       uses: docker/build-push-action@v5
       with:
         context: ./backend
         file: ./backend/Dockerfile.hydration
-        push: true
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/hydration-service:${{ github.sha }}
+        push: false
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}/hydration-service:${{ github.sha }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
-
-    - name: Build and push Notification Service
-      uses: docker/build-push-action@v5
-      with:
-        context: ./backend
-        file: ./backend/Dockerfile.notification
-        push: true
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/notification-service:${{ github.sha }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-
-    - name: Build and push Flutter Web
+    # - name: Build Notification Service
+    #   uses: docker/build-push-action@v5
+    #   with:
+    #     context: ./backend
+    #     file: ./backend/Dockerfile.notification
+    #     push: false
+    #     tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}/notification-service:${{ github.sha }}
+    #     cache-from: type=gha
+    #     cache-to: type=gha,mode=max
+    - name: Build Flutter Web
       uses: docker/build-push-action@v5
       with:
         context: ./frontend
         file: ./frontend/Dockerfile.web
-        push: true
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/flutter-web:${{ github.sha }}
+        push: false
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}/flutter-web:${{ github.sha }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
-
-  # Deploy to Production
   deploy:
     needs: build-images
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-
+    if: github.event_name == 'push'
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-
     - name: Deploy to production
       run: |
         echo "Deploying to production..."
-        # Add your deployment commands here
-        # Example: kubectl apply, docker-compose up, etc.
-
     - name: Notify deployment
       run: |
         echo "Deployment completed successfully!"
-        # Add notification logic (Slack, email, etc.)
-
-  # Security Scan
   security-scan:
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-
     - name: Run Trivy vulnerability scanner
       uses: aquasecurity/trivy-action@master
       with:
@@ -184,7 +161,6 @@ jobs:
         scan-ref: '.'
         format: 'sarif'
         output: 'trivy-results.sarif'
-
     - name: Upload Trivy scan results to GitHub Security tab
       uses: github/codeql-action/upload-sarif@v3
       if: always()
