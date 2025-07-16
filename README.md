@@ -4,6 +4,47 @@ A cross-platform hydration tracking solution featuring a Go microservices backen
 
 ---
 
+## For Users
+
+**What is this app for?**
+
+This application helps you monitor and improve your daily water intake. You can:
+- Register and log in securely
+- Record every glass or bottle of water you drink
+- Set and track your daily hydration goals
+- View detailed statistics and progress charts
+- Use the app on web or mobile (Android/iOS)
+- Access your data offline and sync when online
+
+The app is designed for convenience, privacy, and motivation to help you stay healthy and hydrated every day.
+
+---
+
+## 🧑‍💻 User Features & Screenshots
+
+### 1. Onboarding
+New users are greeted with an onboarding flow that explains the app's benefits and guides them through initial setup.
+
+![Onboarding](screenshots/onboarding.png)
+
+### 2. Registration & Login
+Create a new account or log in securely to access your personal hydration data from any device.
+
+![Registration](screenshots/registration.png)
+![Log In](screenshots/log_in.png)
+
+### 3. Hydration Tracker
+Easily log every glass or bottle of water you drink. The main dashboard shows your daily progress and quick-add buttons for common amounts.
+
+![Hydration Tracker](screenshots/tracker.png)
+
+### 4. Settings & Personalization
+Customize your daily hydration goal, switch between light and dark themes, and manage notification preferences.
+
+![Settings](screenshots/settings.png)
+
+---
+
 ## 🏗️ Architecture
 
 ### Backend (Go)
