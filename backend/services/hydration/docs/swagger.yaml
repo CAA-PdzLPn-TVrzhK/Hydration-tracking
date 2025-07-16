@@ -75,7 +75,7 @@ definitions:
 info:
   contact: {}
 paths:
-  /api/v1/entries:
+  /entries:
     get:
       description: Get all hydration entries for the user / Получить все записи пользователя
       produces:
@@ -136,7 +136,7 @@ paths:
       summary: Add hydration entry / Добавить запись о приёме воды
       tags:
       - hydration
-  /api/v1/goal:
+  /goal:
     put:
       consumes:
       - application/json
@@ -173,7 +173,7 @@ paths:
       summary: Update daily goal / Обновить дневную цель
       tags:
       - hydration
-  /api/v1/stats:
+  /stats:
     get:
       description: Get hydration statistics for the user / Получить статистику пользователя
       produces:

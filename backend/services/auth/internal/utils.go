@@ -12,8 +12,6 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-var secret = []byte("test-secret-key")
-
 func HashPassword(password string) string {
 	// В реальном проекте используйте bcrypt
 	return password
@@ -23,6 +21,8 @@ func CheckPassword(password, hashedPassword string) bool {
 	// В реальном проекте используйте bcrypt.CompareHashAndPassword
 	return password == hashedPassword
 }
+
+var secret = []byte("test-secret-key")
 
 func GenerateToken(userID, username string) (string, error) {
 	claims := Claims{

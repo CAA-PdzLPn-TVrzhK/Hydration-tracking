@@ -74,8 +74,16 @@ type Claims struct {
 
 var (
 	db     Database
-	secret = []byte("your-secret-key")
+	secret []byte
 )
+
+func initSecret() {
+	envSecret := os.Getenv("JWT_SECRET")
+	if envSecret == "" {
+		log.Fatal("JWT_SECRET env variable not set")
+	}
+	secret = []byte(envSecret)
+}
 
 func getEnv(key, defaultValue string) string {
 	if value := os.Getenv(key); value != "" {
@@ -225,7 +233,7 @@ func authMiddleware() gin.HandlerFunc {
 		})
 
 		if err != nil || !token.Valid {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+			c.JSON(http.StatusUnauthorized, ErrorResponse{Error: "Invalid token"})
 			c.Abort()
 			return
 		}
@@ -247,6 +255,7 @@ func authMiddleware() gin.HandlerFunc {
 // @Failure      401   {object}  map[string]string
 // @Router       /api/v1/profile [get]
 func StartServer() error {
+	initSecret()
 	r := gin.Default()
 
 	// Swagger documentation
@@ -260,6 +269,9 @@ func StartServer() error {
 	// Security definitions are set in docs.go
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	r.GET("/health", func(c *gin.Context) {
+		c.String(200, "healthy")
+	})
 
 	api := r.Group("/api/v1")
 	{

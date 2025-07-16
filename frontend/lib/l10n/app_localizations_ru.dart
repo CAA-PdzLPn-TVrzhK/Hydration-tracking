@@ -84,9 +84,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get dailyGoal => 'Дневная цель';
 
   @override
-  String get notifications => 'Уведомления';
-
-  @override
   String get profile => 'Профиль';
 
   @override

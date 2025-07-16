@@ -49,18 +49,6 @@ class SettingsScreen extends ConsumerWidget {
 
           const Divider(),
 
-          // Notifications
-          ListTile(
-            leading: const Icon(Icons.notifications),
-            title: const Text('Уведомления'),
-            subtitle: const Text('Напоминания о воде'),
-            onTap: () {
-              _showNotificationSettings(context);
-            },
-          ),
-
-          const Divider(),
-
           // Profile
           ListTile(
             leading: const Icon(Icons.person),
@@ -134,23 +122,6 @@ class SettingsScreen extends ConsumerWidget {
         title: const Text('Дневная цель'),
         content: const Text(
             'Функция настройки дневной цели будет добавлена в следующем обновлении.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showNotificationSettings(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Уведомления'),
-        content: const Text(
-            'Настройки уведомлений будут добавлены в следующем обновлении.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),

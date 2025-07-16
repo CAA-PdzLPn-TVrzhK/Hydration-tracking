@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/v1/entries": {
+        "/entries": {
             "get": {
                 "security": [
                     {
@@ -110,7 +110,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/goal": {
+        "/goal": {
             "put": {
                 "security": [
                     {
@@ -167,7 +167,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/stats": {
+        "/stats": {
             "get": {
                 "security": [
                     {

@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/v1/login": {
+        "/login": {
             "post": {
                 "description": "Login user and get JWT / Войти и получить JWT",
                 "consumes": [
@@ -61,7 +61,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/profile": {
+        "/profile": {
             "get": {
                 "security": [
                     {
@@ -96,7 +96,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/register": {
+        "/register": {
             "post": {
                 "description": "Register a new user / Зарегистрировать нового пользователя",
                 "consumes": [

@@ -80,6 +80,7 @@ services:
       - DB_PASSWORD=password
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - JWT_SECRET=your-secret-key
     depends_on:
       postgres:
         condition: service_healthy

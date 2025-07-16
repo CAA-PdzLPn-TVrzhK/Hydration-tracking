@@ -66,7 +66,7 @@ definitions:
 info:
   contact: {}
 paths:
-  /api/v1/login:
+  /login:
     post:
       consumes:
       - application/json
@@ -96,7 +96,7 @@ paths:
       summary: Login user / Вход пользователя
       tags:
       - auth
-  /api/v1/profile:
+  /profile:
     get:
       description: Get current user profile (JWT required) / Получить профиль по JWT
       produces:
@@ -118,7 +118,7 @@ paths:
       summary: Get user profile / Получить профиль пользователя
       tags:
       - auth
-  /api/v1/register:
+  /register:
     post:
       consumes:
       - application/json

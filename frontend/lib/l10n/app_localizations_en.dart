@@ -84,9 +84,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dailyGoal => 'Daily Goal';
 
   @override
-  String get notifications => 'Notifications';
-
-  @override
   String get profile => 'Profile';
 
   @override

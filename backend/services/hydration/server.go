@@ -64,7 +64,7 @@ type Claims struct {
 
 var (
 	db     *sql.DB
-	secret = []byte("your-secret-key")
+	secret []byte
 )
 
 func getEnv(key, defaultValue string) string {
@@ -72,6 +72,14 @@ func getEnv(key, defaultValue string) string {
 		return value
 	}
 	return defaultValue
+}
+
+func initSecret() {
+	envSecret := os.Getenv("JWT_SECRET")
+	if envSecret == "" {
+		log.Fatal("JWT_SECRET env variable not set")
+	}
+	secret = []byte(envSecret)
 }
 
 func InitDB() {
@@ -344,6 +352,7 @@ func authMiddleware() gin.HandlerFunc {
 }
 
 func StartServer() error {
+	initSecret()
 	r := gin.Default()
 
 	// Swagger documentation
@@ -351,10 +360,13 @@ func StartServer() error {
 	docs.SwaggerInfo.Description = "Hydration tracking microservice"
 	docs.SwaggerInfo.Version = "1.0"
 	docs.SwaggerInfo.Host = "localhost:8082"
-	docs.SwaggerInfo.BasePath = ""
+	docs.SwaggerInfo.BasePath = "/api/v1"
 	docs.SwaggerInfo.Schemes = []string{"http"}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	r.GET("/health", func(c *gin.Context) {
+		c.String(200, "healthy")
+	})
 
 	api := r.Group("/api/v1")
 	api.Use(authMiddleware())

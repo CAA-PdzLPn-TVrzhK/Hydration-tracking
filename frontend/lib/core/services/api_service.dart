@@ -14,9 +14,9 @@ class ApiService {
   // Use different URLs for different platforms
   static String get baseUrl {
     if (kIsWeb) {
-      return 'http://localhost:8081'; // Web
+      return 'http://localhost:80/api/v1/auth'; // Web через nginx
     } else {
-      return 'http://10.0.2.2:8081'; // Android emulator
+      return 'http://10.0.2.2:80'; // Android emulator
       // For iOS simulator use: 'http://localhost:8081'
       // For physical device use your computer's IP address
     }
@@ -24,9 +24,9 @@ class ApiService {
   
   static String get hydrationBaseUrl {
     if (kIsWeb) {
-      return 'http://localhost:8082'; // Web
+      return 'http://localhost:80/api/v1/hydration'; // Web через nginx
     } else {
-      return 'http://10.0.2.2:8082'; // Android emulator
+      return 'http://10.0.2.2:80'; // Android emulator
       // For iOS simulator use: 'http://localhost:8082'
       // For physical device use your computer's IP address
     }
@@ -92,7 +92,7 @@ class ApiService {
     required String password,
   }) async {
     try {
-      final response = await _dio.post('/api/v1/register', data: {
+      final response = await _dio.post('/register', data: {
         'username': username,
         'email': email,
         'password': password,
@@ -108,7 +108,7 @@ class ApiService {
     required String password,
   }) async {
     try {
-      final response = await _dio.post('/api/v1/login', data: {
+      final response = await _dio.post('/login', data: {
         'username': username,
         'password': password,
       });
@@ -126,9 +126,38 @@ class ApiService {
 
   Future<Map<String, dynamic>> getProfile() async {
     try {
-      await _addAuthHeader(_dio);
-      final response = await _dio.get('/api/v1/profile');
+      final token = await _getToken();
+      final profileDio = Dio(BaseOptions(
+        baseUrl: baseUrl,
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 10),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      ));
+      await _addAuthHeader(profileDio);
+      final response = await profileDio.get('/profile');
       return response.data;
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getHydrationEntries() async {
+    try {
+      final hydrationDio = Dio(BaseOptions(
+        baseUrl: hydrationBaseUrl,
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 10),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      ));
+
+      await _addAuthHeader(hydrationDio);
+      
+      final response = await hydrationDio.get('/entries');
+      return List<Map<String, dynamic>>.from(response.data);
     } on DioException catch (e) {
       throw _handleDioError(e);
     }
@@ -155,7 +184,7 @@ class ApiService {
 
       await _addAuthHeader(hydrationDio);
       
-      final response = await hydrationDio.post('/api/v1/entries', data: {
+      final response = await hydrationDio.post('/entries', data: {
         'amount': amount,
         'type': type,
       });
@@ -166,25 +195,7 @@ class ApiService {
     }
   }
 
-  Future<List<Map<String, dynamic>>> getHydrationEntries() async {
-    try {
-      final hydrationDio = Dio(BaseOptions(
-        baseUrl: hydrationBaseUrl,
-        connectTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 10),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      ));
-
-      await _addAuthHeader(hydrationDio);
-      
-      final response = await hydrationDio.get('/api/v1/entries');
-      return List<Map<String, dynamic>>.from(response.data);
-    } on DioException catch (e) {
-      throw _handleDioError(e);
-    }
-  }
+  
 
   Future<Map<String, dynamic>> getHydrationStats() async {
     try {
@@ -199,7 +210,7 @@ class ApiService {
 
       await _addAuthHeader(hydrationDio);
       
-      final response = await hydrationDio.get('/api/v1/stats');
+      final response = await hydrationDio.get('/stats');
       return response.data;
     } on DioException catch (e) {
       throw _handleDioError(e);
@@ -219,7 +230,7 @@ class ApiService {
 
       await _addAuthHeader(hydrationDio);
       
-      final response = await hydrationDio.put('/api/v1/goal', data: {
+      final response = await hydrationDio.put('/goal', data: {
         'goal': goal,
       });
       
@@ -269,7 +280,7 @@ class ApiService {
   // Check if backend is available
   Future<bool> isBackendAvailable() async {
     try {
-      await _dio.get('/api/v1/profile', 
+      await _dio.get('/profile', 
         options: Options(validateStatus: (status) => status! < 500));
       return true;
     } catch (e) {

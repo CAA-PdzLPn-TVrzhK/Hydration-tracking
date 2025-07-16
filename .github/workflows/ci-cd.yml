@@ -118,15 +118,6 @@ jobs:
         tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}/hydration-service:${{ github.sha }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
-    # - name: Build Notification Service
-    #   uses: docker/build-push-action@v5
-    #   with:
-    #     context: ./backend
-    #     file: ./backend/Dockerfile.notification
-    #     push: false
-    #     tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}/notification-service:${{ github.sha }}
-    #     cache-from: type=gha
-    #     cache-to: type=gha,mode=max
     - name: Build Flutter Web
       uses: docker/build-push-action@v5
       with:

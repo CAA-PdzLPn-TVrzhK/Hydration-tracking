@@ -36,10 +36,6 @@ dependencies:
   # Charts and Visualizations
   fl_chart: ^0.66.0
   
-  # Notifications (removed - not implemented in backend)
-  # flutter_local_notifications: ^19.3.0
-  # timezone: ^0.10.1
-  
   # Date and Time
   intl: 0.20.2
   
