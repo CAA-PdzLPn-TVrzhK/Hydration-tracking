@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/entries": {
+        "/api/v1/entries": {
             "get": {
                 "security": [
                     {
@@ -32,7 +32,7 @@ const docTemplate = `{
                 "summary": "Get all hydration entries / Получить все записи",
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "List of hydration entries",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -41,21 +41,15 @@ const docTemplate = `{
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Unauthorized - Invalid token",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/hydration.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/hydration.ErrorResponse"
                         }
                     }
                 }
@@ -90,42 +84,33 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "Created",
+                        "description": "Entry created successfully",
                         "schema": {
                             "$ref": "#/definitions/hydration.HydrationEntry"
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Bad Request - Invalid input",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/hydration.ErrorResponse"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Unauthorized - Invalid token",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/hydration.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/hydration.ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/goal": {
+        "/api/v1/goal": {
             "put": {
                 "security": [
                     {
@@ -150,52 +135,39 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "integer"
-                            }
+                            "$ref": "#/definitions/hydration.UpdateGoalRequest"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Goal updated successfully",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/hydration.UpdateGoalResponse"
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Bad Request - Invalid input",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/hydration.ErrorResponse"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Unauthorized - Invalid token",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/hydration.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/hydration.ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/stats": {
+        "/api/v1/stats": {
             "get": {
                 "security": [
                     {
@@ -212,27 +184,21 @@ const docTemplate = `{
                 "summary": "Get hydration stats / Получить статистику",
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Hydration statistics",
                         "schema": {
                             "$ref": "#/definitions/hydration.HydrationStats"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Unauthorized - Invalid token",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/hydration.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/hydration.ErrorResponse"
                         }
                     }
                 }
@@ -249,10 +215,21 @@ const docTemplate = `{
             "properties": {
                 "amount": {
                     "type": "integer",
-                    "minimum": 1
+                    "minimum": 1,
+                    "example": 250
                 },
                 "type": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "water"
+                }
+            }
+        },
+        "hydration.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "Invalid input data"
                 }
             }
         },
@@ -260,19 +237,24 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "amount": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 250
                 },
                 "id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "timestamp": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
                 },
                 "type": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "water"
                 },
                 "user_id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 }
             }
         },
@@ -280,21 +262,59 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "goal": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 2000
                 },
                 "goal_percentage": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 75
                 },
                 "total_month": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 45000
                 },
                 "total_today": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 1500
                 },
                 "total_week": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 10500
                 }
             }
+        },
+        "hydration.UpdateGoalRequest": {
+            "type": "object",
+            "required": [
+                "goal"
+            ],
+            "properties": {
+                "goal": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "example": 2000
+                }
+            }
+        },
+        "hydration.UpdateGoalResponse": {
+            "type": "object",
+            "properties": {
+                "goal": {
+                    "type": "integer",
+                    "example": 2000
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Goal updated successfully"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`

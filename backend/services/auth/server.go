@@ -1,5 +1,9 @@
 package auth
 
+// @SecurityDefinitions.apikey BearerAuth
+// @In header
+// @Name Authorization
+
 import (
 	"database/sql"
 	"fmt"
@@ -8,14 +12,21 @@ import (
 	"os"
 	"time"
 
+	"hydration-tracking/services/auth/docs"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	_ "github.com/lib/pq"
-	"github.com/swaggo/files"
-	"github.com/swaggo/gin-swagger"
-	"hydration-tracking/services/auth/docs"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
+
+// Database interface for testing
+type Database interface {
+	Exec(query string, args ...interface{}) (sql.Result, error)
+	QueryRow(query string, args ...interface{}) *sql.Row
+}
 
 type User struct {
 	ID       string `json:"id"`
@@ -25,14 +36,34 @@ type User struct {
 }
 
 type LoginRequest struct {
-	Username string `json:"username" binding:"required"`
-	Password string `json:"password" binding:"required"`
+	Username string `json:"username" binding:"required" example:"john_doe"`
+	Password string `json:"password" binding:"required" example:"password123"`
 }
 
 type RegisterRequest struct {
-	Username string `json:"username" binding:"required"`
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required,min=6"`
+	Username string `json:"username" binding:"required" example:"john_doe"`
+	Email    string `json:"email" binding:"required,email" example:"john@example.com"`
+	Password string `json:"password" binding:"required,min=6" example:"password123"`
+}
+
+type RegisterResponse struct {
+	Message string `json:"message" example:"User registered successfully"`
+	UserID  string `json:"user_id" example:"550e8400-e29b-41d4-a716-446655440000"`
+}
+
+type LoginResponse struct {
+	Token string   `json:"token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
+	User  UserInfo `json:"user"`
+}
+
+type UserInfo struct {
+	ID       string `json:"id" example:"550e8400-e29b-41d4-a716-446655440000"`
+	Username string `json:"username" example:"john_doe"`
+	Email    string `json:"email" example:"john@example.com"`
+}
+
+type ErrorResponse struct {
+	Error string `json:"error" example:"Invalid credentials"`
 }
 
 type Claims struct {
@@ -42,7 +73,7 @@ type Claims struct {
 }
 
 var (
-	db     *sql.DB
+	db     Database
 	secret = []byte("your-secret-key")
 )
 
@@ -53,7 +84,7 @@ func getEnv(key, defaultValue string) string {
 	return defaultValue
 }
 
-func init() {
+func InitDB() {
 	// Load environment variables
 	dbHost := getEnv("DB_HOST", "localhost")
 	dbPort := getEnv("DB_PORT", "5432")
@@ -64,12 +95,13 @@ func init() {
 
 	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s",
 		dbUser, dbPassword, dbHost, dbPort, dbName, dbSSLMode)
-	
+
 	var err error
-	db, err = sql.Open("postgres", connStr)
+	sqlDB, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal(err)
 	}
+	db = sqlDB
 
 	// Create users table if not exists
 	createTable := `
@@ -94,13 +126,13 @@ func init() {
 // @Accept       json
 // @Produce      json
 // @Param        data  body  RegisterRequest  true  "User data / Данные пользователя"
-// @Success      201   {object}  map[string]interface{}
-// @Failure      400   {object}  map[string]string
+// @Success      201   {object}  RegisterResponse
+// @Failure      400   {object}  ErrorResponse
 // @Router       /api/v1/register [post]
 func register(c *gin.Context) {
 	var req RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, ErrorResponse{Error: err.Error()})
 		return
 	}
 
@@ -110,11 +142,11 @@ func register(c *gin.Context) {
 	_, err := db.Exec("INSERT INTO users (id, username, email, password) VALUES ($1, $2, $3, $4)",
 		userID, req.Username, req.Email, hashedPassword)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Username or email already exists"})
+		c.JSON(http.StatusBadRequest, ErrorResponse{Error: "Username or email already exists"})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "User registered successfully", "user_id": userID})
+	c.JSON(http.StatusCreated, RegisterResponse{Message: "User registered successfully", UserID: userID})
 }
 
 // Login godoc
@@ -124,13 +156,13 @@ func register(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Param        data  body  LoginRequest  true  "Login data / Данные для входа"
-// @Success      200   {object}  map[string]interface{}
-// @Failure      400,401   {object}  map[string]string
+// @Success      200   {object}  LoginResponse
+// @Failure      400,401   {object}  ErrorResponse
 // @Router       /api/v1/login [post]
 func login(c *gin.Context) {
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, ErrorResponse{Error: err.Error()})
 		return
 	}
 
@@ -138,21 +170,17 @@ func login(c *gin.Context) {
 	err := db.QueryRow("SELECT id, username, email, password FROM users WHERE username = $1",
 		req.Username).Scan(&user.ID, &user.Username, &user.Email, &user.Password)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		c.JSON(http.StatusUnauthorized, ErrorResponse{Error: "Invalid credentials"})
 		return
 	}
 
 	if !checkPassword(req.Password, user.Password) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		c.JSON(http.StatusUnauthorized, ErrorResponse{Error: "Invalid credentials"})
 		return
 	}
 
 	token := generateToken(user.ID, user.Username)
-	c.JSON(http.StatusOK, gin.H{"token": token, "user": gin.H{
-		"id":       user.ID,
-		"username": user.Username,
-		"email":    user.Email,
-	}})
+	c.JSON(http.StatusOK, LoginResponse{Token: token, User: UserInfo{ID: user.ID, Username: user.Username, Email: user.Email}})
 }
 
 func generateToken(userID, username string) string {
@@ -183,7 +211,7 @@ func authMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenString := c.GetHeader("Authorization")
 		if tokenString == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header required"})
+			c.JSON(http.StatusUnauthorized, ErrorResponse{Error: "Authorization header required"})
 			c.Abort()
 			return
 		}
@@ -229,6 +257,8 @@ func StartServer() error {
 	docs.SwaggerInfo.BasePath = "/api/v1"
 	docs.SwaggerInfo.Schemes = []string{"http"}
 
+	// Security definitions are set in docs.go
+
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	api := r.Group("/api/v1")
@@ -253,4 +283,4 @@ func StartServer() error {
 
 	log.Println("Auth service starting on port 8081")
 	return r.Run(":8081")
-} 
+}
