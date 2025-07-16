@@ -54,7 +54,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String get todayDrank => 'Today Drank';
 
   @override
-  String get progress => 'Progress';
+  String drankOfGoal(Object current, Object goal) {
+    return '$current ml of $goal ml';
+  }
+
+  @override
+  String progress(Object percent) {
+    return 'Progress: $percent%';
+  }
+
+  @override
+  String percent(Object percent) {
+    return '$percent%';
+  }
+
+  @override
+  String get waterType => 'water';
+
+  @override
+  String get now => 'now';
+
+  @override
+  String minAgo(Object minutes) {
+    return '$minutes min ago';
+  }
+
+  @override
+  String hAgo(Object hours) {
+    return '$hours h ago';
+  }
 
   @override
   String get addWaterIntake => 'Add Water Intake';
@@ -139,4 +167,94 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noEntriesYet => 'No entries yet';
+
+  @override
+  String get personalData => 'Personal Data';
+
+  @override
+  String get waterReminders => 'Water reminders';
+
+  @override
+  String get checkConnection => 'Check connection';
+
+  @override
+  String get version => 'Version';
+
+  @override
+  String get goalFeatureComingSoon => 'Daily goal feature will be added in the next update.';
+
+  @override
+  String get notificationsFeatureComingSoon => 'Notification settings will be added in the next update.';
+
+  @override
+  String get profileFeatureComingSoon => 'Profile editing will be added in the next update.';
+
+  @override
+  String get checkingConnection => 'Checking connection...';
+
+  @override
+  String get apiAvailable => 'API available';
+
+  @override
+  String get apiUnavailable => 'API unavailable';
+
+  @override
+  String get makeSureBackendRunning => 'Make sure the backend is running on ports 8081 and 8082';
+
+  @override
+  String get aboutAppDesc => 'An app for tracking your water intake';
+
+  @override
+  String get logoutConfirm => 'Are you sure you want to log out?';
+
+  @override
+  String get dashboardLoadError => 'Error loading dashboard';
+
+  @override
+  String get weeklyProgress => 'Weekly Progress';
+
+  @override
+  String get waterChartStub => 'Water chart (stub)';
+
+  @override
+  String get repeatPassword => 'Repeat Password';
+
+  @override
+  String get passwordsDontMatch => 'Passwords do not match';
+
+  @override
+  String get alreadyHaveAccountLogin => 'Already have an account? Login';
+
+  @override
+  String get noAccountRegister => 'No account? Register';
+
+  @override
+  String get ml => 'ml';
+
+  @override
+  String platformInfo(Object platform) {
+    return 'Platform: $platform';
+  }
+
+  @override
+  String authApiInfo(Object url) {
+    return 'Auth API: $url';
+  }
+
+  @override
+  String hydrationApiInfo(Object url) {
+    return 'Hydration API: $url';
+  }
+
+  @override
+  String get enterValidEmail => 'Enter a valid email';
+
+  @override
+  String get minutesAgo => 'min ago';
+
+  @override
+  String get hoursAgo => 'h ago';
+
+  @override
+  String get teaType => 'tea';
 }

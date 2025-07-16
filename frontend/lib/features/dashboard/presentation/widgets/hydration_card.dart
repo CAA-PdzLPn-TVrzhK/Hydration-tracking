@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hydration_tracker/l10n/app_localizations.dart';
 
 class HydrationCard extends StatelessWidget {
   final int currentAmount;
@@ -14,13 +15,13 @@ class HydrationCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Сегодня выпито', style: Theme.of(context).textTheme.titleLarge),
+            Text(AppLocalizations.of(context)!.todayDrank, style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
-            Text('$currentAmount мл из $goalAmount мл'),
+            Text(AppLocalizations.of(context)!.drankOfGoal(currentAmount, goalAmount)),
             const SizedBox(height: 8),
             LinearProgressIndicator(value: percentage / 100),
             const SizedBox(height: 8),
-            Text('Прогресс: $percentage%'),
+            Text(AppLocalizations.of(context)!.progress(percentage)),
           ],
         ),
       ),

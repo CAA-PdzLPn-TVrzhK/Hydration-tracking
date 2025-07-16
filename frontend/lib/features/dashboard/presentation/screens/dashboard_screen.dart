@@ -6,6 +6,7 @@ import 'package:hydration_tracker/features/dashboard/presentation/widgets/quick_
 import 'package:hydration_tracker/features/dashboard/presentation/widgets/stats_card.dart';
 import 'package:hydration_tracker/features/dashboard/presentation/widgets/water_intake_chart.dart';
 import 'package:hydration_tracker/features/dashboard/presentation/providers/dashboard_provider.dart';
+import 'package:hydration_tracker/l10n/app_localizations.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -32,7 +33,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
-        title: const Text('Hydration Tracker'),
+        title: Text(AppLocalizations.of(context)!.appTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
@@ -56,7 +57,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Error loading dashboard',
+                AppLocalizations.of(context)!.dashboardLoadError,
                 style: theme.textTheme.titleLarge,
               ),
               const SizedBox(height: 8),
@@ -70,7 +71,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 onPressed: () {
                   ref.read(dashboardProvider.notifier).loadDashboardData();
                 },
-                child: const Text('Retry'),
+                child: Text(AppLocalizations.of(context)!.retry),
               ),
             ],
           ),
@@ -118,7 +119,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               children: [
                 Expanded(
                   child: StatsCard(
-                    title: 'This Week',
+                    title: AppLocalizations.of(context)!.thisWeek,
                     value: '${data.weeklyIntake}ml',
                     icon: Icons.calendar_today,
                     color: AppTheme.successGreen,
@@ -127,7 +128,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: StatsCard(
-                    title: 'This Month',
+                    title: AppLocalizations.of(context)!.thisMonth,
                     value: '${data.monthlyIntake}ml',
                     icon: Icons.calendar_month,
                     color: AppTheme.accentBlue,
@@ -146,7 +147,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Weekly Progress',
+                      AppLocalizations.of(context)!.weeklyProgress,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 16),
@@ -169,7 +170,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Recent Entries',
+                      AppLocalizations.of(context)!.recentEntries,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 16),
@@ -186,7 +187,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                'No entries yet',
+                                AppLocalizations.of(context)!.noEntriesYet,
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodyMedium
@@ -215,11 +216,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                               ),
                             ),
                             title: Text('${entry.amount}ml'),
-                            subtitle: Text(entry.type),
-                            trailing: Text(
-                              entry.time,
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
+                            subtitle: Text(_localizedDrinkType(context, entry.type)),
+                            trailing: Text(_localizedEntryTime(context, entry.time)),
                           );
                         },
                       ),
@@ -237,14 +235,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Add Water Intake'),
+        title: Text(AppLocalizations.of(context)!.addWaterIntake),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Amount (ml)',
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context)!.amountMl,
                 hintText: '250',
               ),
               onSubmitted: (value) {
@@ -260,17 +258,45 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           ElevatedButton(
             onPressed: () {
               // Handle add water logic
               Navigator.of(context).pop();
             },
-            child: const Text('Add'),
+            child: Text(AppLocalizations.of(context)!.add),
           ),
         ],
       ),
     );
   }
+}
+
+String _localizedDrinkType(BuildContext context, String type) {
+  switch (type.toLowerCase()) {
+    case 'water':
+    case 'вода':
+      return AppLocalizations.of(context)!.waterType;
+    case 'tea':
+    case 'чай':
+      return AppLocalizations.of(context)!.teaType;
+    default:
+      return type;
+  }
+}
+
+String _localizedEntryTime(BuildContext context, String time) {
+  if (time == 'now' || time == 'сейчас') {
+    return AppLocalizations.of(context)!.now;
+  }
+  if (time.endsWith('min ago') || time.endsWith('мин назад')) {
+    final num = RegExp(r'\d+').stringMatch(time) ?? '';
+    return AppLocalizations.of(context)!.minAgo(num);
+  }
+  if (time.endsWith('h ago') || time.endsWith('ч назад')) {
+    final num = RegExp(r'\d+').stringMatch(time) ?? '';
+    return AppLocalizations.of(context)!.hAgo(num);
+  }
+  return time;
 }

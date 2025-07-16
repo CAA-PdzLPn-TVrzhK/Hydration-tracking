@@ -4,6 +4,7 @@ import 'package:hydration_tracker/core/theme/theme_provider.dart';
 import 'package:hydration_tracker/core/services/api_service.dart';
 import 'package:hydration_tracker/features/auth/presentation/providers/auth_provider.dart';
 import 'package:hydration_tracker/core/providers/language_provider.dart';
+import 'package:hydration_tracker/l10n/app_localizations.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -14,7 +15,7 @@ class SettingsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Настройки'),
+        title: Text(AppLocalizations.of(context)!.settings),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
@@ -25,8 +26,8 @@ class SettingsScreen extends ConsumerWidget {
           // Theme Settings
           ListTile(
             leading: const Icon(Icons.palette),
-            title: const Text('Тема'),
-            subtitle: Text(themeMode == ThemeMode.dark ? 'Тёмная' : 'Светлая'),
+            title: Text(AppLocalizations.of(context)!.theme),
+            subtitle: Text(themeMode == ThemeMode.dark ? AppLocalizations.of(context)!.dark : AppLocalizations.of(context)!.light),
             trailing: Switch(
               value: themeMode == ThemeMode.dark,
               onChanged: (value) {
@@ -40,8 +41,8 @@ class SettingsScreen extends ConsumerWidget {
           // Daily Goal
           ListTile(
             leading: const Icon(Icons.flag),
-            title: const Text('Дневная цел'),
-            subtitle: const Text('2000 мл'),
+            title: Text(AppLocalizations.of(context)!.dailyGoal),
+            subtitle: Text('2000 ${AppLocalizations.of(context)!.ml}'),
             onTap: () {
               _showGoalDialog(context);
             },
@@ -52,8 +53,8 @@ class SettingsScreen extends ConsumerWidget {
           // Notifications
           ListTile(
             leading: const Icon(Icons.notifications),
-            title: const Text('Уведомления'),
-            subtitle: const Text('Напоминания о воде'),
+            title: Text(AppLocalizations.of(context)!.notifications),
+            subtitle: Text(AppLocalizations.of(context)!.waterReminders),
             onTap: () {
               _showNotificationSettings(context);
             },
@@ -64,8 +65,8 @@ class SettingsScreen extends ConsumerWidget {
           // Profile
           ListTile(
             leading: const Icon(Icons.person),
-            title: const Text('Профиль'),
-            subtitle: const Text('Личные данные'),
+            title: Text(AppLocalizations.of(context)!.profile),
+            subtitle: Text(AppLocalizations.of(context)!.personalData),
             onTap: () {
               _showProfileSettings(context);
             },
@@ -79,8 +80,10 @@ class SettingsScreen extends ConsumerWidget {
               final locale = ref.watch(languageProvider);
               return ListTile(
                 leading: const Icon(Icons.language),
-                title: const Text('Язык'),
-                subtitle: Text(locale.languageCode == 'en' ? 'English' : 'Русский'),
+                title: Text(AppLocalizations.of(context)!.language),
+                subtitle: Text(locale.languageCode == 'en'
+                    ? AppLocalizations.of(context)!.english
+                    : AppLocalizations.of(context)!.russian),
                 onTap: () {
                   _showLanguageDialog(context, ref);
                 },
@@ -93,8 +96,8 @@ class SettingsScreen extends ConsumerWidget {
           // API Status
           ListTile(
             leading: const Icon(Icons.wifi),
-            title: const Text('Статус API'),
-            subtitle: const Text('Проверить подключение'),
+            title: Text(AppLocalizations.of(context)!.apiStatus),
+            subtitle: Text(AppLocalizations.of(context)!.checkConnection),
             onTap: () {
               _showApiStatusDialog(context);
             },
@@ -105,8 +108,8 @@ class SettingsScreen extends ConsumerWidget {
           // About
           ListTile(
             leading: const Icon(Icons.info),
-            title: const Text('О приложении'),
-            subtitle: const Text('Версия 1.0.0'),
+            title: Text(AppLocalizations.of(context)!.about),
+            subtitle: Text('${AppLocalizations.of(context)!.version} 1.0.0'),
             onTap: () {
               _showAboutDialog(context);
             },
@@ -117,7 +120,7 @@ class SettingsScreen extends ConsumerWidget {
           // Logout
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text('Выйти', style: TextStyle(color: Colors.red)),
+            title: Text(AppLocalizations.of(context)!.logout, style: const TextStyle(color: Colors.red)),
             onTap: () {
               _showLogoutDialog(context, ref);
             },
@@ -131,13 +134,12 @@ class SettingsScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Дневная цель'),
-        content: const Text(
-            'Функция настройки дневной цели будет добавлена в следующем обновлении.'),
+        title: Text(AppLocalizations.of(context)!.dailyGoal),
+        content: Text(AppLocalizations.of(context)!.goalFeatureComingSoon),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+            child: Text(AppLocalizations.of(context)!.ok),
           ),
         ],
       ),
@@ -148,13 +150,12 @@ class SettingsScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Уведомления'),
-        content: const Text(
-            'Настройки уведомлений будут добавлены в следующем обновлении.'),
+        title: Text(AppLocalizations.of(context)!.notifications),
+        content: Text(AppLocalizations.of(context)!.notificationsFeatureComingSoon),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+            child: Text(AppLocalizations.of(context)!.ok),
           ),
         ],
       ),
@@ -165,13 +166,12 @@ class SettingsScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Профиль'),
-        content: const Text(
-            'Редактирование профиля будет добавлено в следующем обновлении.'),
+        title: Text(AppLocalizations.of(context)!.profile),
+        content: Text(AppLocalizations.of(context)!.profileFeatureComingSoon),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+            child: Text(AppLocalizations.of(context)!.ok),
           ),
         ],
       ),
@@ -188,21 +188,21 @@ class SettingsScreen extends ConsumerWidget {
           final isLoading = snapshot.connectionState == ConnectionState.waiting;
           
           return AlertDialog(
-            title: const Text('Статус API'),
+            title: Text(AppLocalizations.of(context)!.apiStatus),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (isLoading)
-                  const Row(
+                  Row(
                     children: [
-                      SizedBox(
+                      const SizedBox(
                         width: 16,
                         height: 16,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       ),
-                      SizedBox(width: 8),
-                      Text('Проверка подключения...'),
+                      const SizedBox(width: 8),
+                      Text(AppLocalizations.of(context)!.checkingConnection),
                     ],
                   )
                 else
@@ -214,7 +214,7 @@ class SettingsScreen extends ConsumerWidget {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        isAvailable ? 'API доступен' : 'API недоступен',
+                        isAvailable ? AppLocalizations.of(context)!.apiAvailable : AppLocalizations.of(context)!.apiUnavailable,
                         style: TextStyle(
                           color: isAvailable ? Colors.green : Colors.red,
                           fontWeight: FontWeight.bold,
@@ -223,23 +223,23 @@ class SettingsScreen extends ConsumerWidget {
                     ],
                   ),
                 const SizedBox(height: 16),
-                Text('Платформа: ${ApiService().getPlatformInfo()}'),
+                Text(AppLocalizations.of(context)!.platformInfo(ApiService().getPlatformInfo())),
                 const SizedBox(height: 4),
-                Text('Auth API: ${ApiService.baseUrl}'),
+                Text(AppLocalizations.of(context)!.authApiInfo(ApiService.baseUrl)),
                 const SizedBox(height: 4),
-                Text('Hydration API: ${ApiService.hydrationBaseUrl}'),
+                Text(AppLocalizations.of(context)!.hydrationApiInfo(ApiService.hydrationBaseUrl)),
                 const SizedBox(height: 16),
                 if (!isAvailable)
-                  const Text(
-                    'Убедитесь, что бэкенд запущен на портах 8081 и 8082',
-                    style: TextStyle(fontSize: 12, color: Colors.orange),
+                  Text(
+                    AppLocalizations.of(context)!.makeSureBackendRunning,
+                    style: const TextStyle(fontSize: 12, color: Colors.orange),
                   ),
               ],
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('OK'),
+                child: Text(AppLocalizations.of(context)!.ok),
               ),
             ],
           );
@@ -252,22 +252,22 @@ class SettingsScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('О приложении'),
-        content: const Column(
+        title: Text(AppLocalizations.of(context)!.about),
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Hydration Tracker'),
-            SizedBox(height: 8),
-            Text('Версия: 1.0.0'),
-            SizedBox(height: 8),
-            Text('Приложение для отслеживания потребления воды'),
+            Text(AppLocalizations.of(context)!.appTitle),
+            const SizedBox(height: 8),
+            Text('${AppLocalizations.of(context)!.version}: 1.0.0'),
+            const SizedBox(height: 8),
+            Text(AppLocalizations.of(context)!.aboutAppDesc),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+            child: Text(AppLocalizations.of(context)!.ok),
           ),
         ],
       ),
@@ -278,12 +278,12 @@ class SettingsScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Выйти'),
-        content: const Text('Вы уверены, что хотите выйти из аккаунта?'),
+        title: Text(AppLocalizations.of(context)!.logout),
+        content: Text(AppLocalizations.of(context)!.logoutConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Отмена'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           TextButton(
             onPressed: () async {
@@ -293,7 +293,7 @@ class SettingsScreen extends ConsumerWidget {
                 Navigator.pushReplacementNamed(context, '/login');
               }
             },
-            child: const Text('Выйти', style: TextStyle(color: Colors.red)),
+            child: Text(AppLocalizations.of(context)!.logout, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -306,14 +306,14 @@ class SettingsScreen extends ConsumerWidget {
       builder: (context) {
         final locale = ref.watch(languageProvider);
         return AlertDialog(
-          title: const Text('Выберите язык'),
+          title: Text(AppLocalizations.of(context)!.chooseLanguage),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               RadioListTile<Locale>(
                 value: const Locale('ru'),
                 groupValue: locale,
-                title: const Text('Русский'),
+                title: Text(AppLocalizations.of(context)!.russian),
                 onChanged: (value) {
                   ref.read(languageProvider.notifier).setLanguage(const Locale('ru'));
                   Navigator.pop(context);
@@ -322,7 +322,7 @@ class SettingsScreen extends ConsumerWidget {
               RadioListTile<Locale>(
                 value: const Locale('en'),
                 groupValue: locale,
-                title: const Text('English'),
+                title: Text(AppLocalizations.of(context)!.english),
                 onChanged: (value) {
                   ref.read(languageProvider.notifier).setLanguage(const Locale('en'));
                   Navigator.pop(context);
@@ -333,7 +333,7 @@ class SettingsScreen extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Отмена'),
+              child: Text(AppLocalizations.of(context)!.cancel),
             ),
           ],
         );

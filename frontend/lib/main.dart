@@ -10,8 +10,8 @@ import 'package:hydration_tracker/features/settings/presentation/screens/setting
 import 'package:hydration_tracker/core/services/storage_service.dart';
 import 'package:hydration_tracker/core/services/api_service.dart';
 import 'package:hydration_tracker/features/auth/presentation/providers/auth_provider.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hydration_tracker/core/providers/language_provider.dart';
+import 'package:hydration_tracker/l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -64,15 +64,8 @@ class _HydrationTrackerAppState extends ConsumerState<HydrationTrackerApp> {
         '/settings': (context) => const SettingsScreen(),
       },
       locale: ref.watch(languageProvider),
-      supportedLocales: const [
-        Locale('en'),
-        Locale('ru'),
-      ],
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
     );
   }
 
