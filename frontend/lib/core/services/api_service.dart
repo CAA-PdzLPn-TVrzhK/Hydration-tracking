@@ -16,7 +16,7 @@ class ApiService {
     if (kIsWeb) {
       return 'http://localhost:80/api/v1/auth'; // Web через nginx
     } else {
-      return 'http://10.0.2.2:80'; // Android emulator
+      return 'http://10.0.2.2:80/api/v1/auth'; // Android emulator
       // For iOS simulator use: 'http://localhost:8081'
       // For physical device use your computer's IP address
     }
@@ -26,7 +26,7 @@ class ApiService {
     if (kIsWeb) {
       return 'http://localhost:80/api/v1/hydration'; // Web через nginx
     } else {
-      return 'http://10.0.2.2:80'; // Android emulator
+      return 'http://10.0.2.2:80/api/v1/hydration'; // Android emulator
       // For iOS simulator use: 'http://localhost:8082'
       // For physical device use your computer's IP address
     }
@@ -126,7 +126,6 @@ class ApiService {
 
   Future<Map<String, dynamic>> getProfile() async {
     try {
-      final token = await _getToken();
       final profileDio = Dio(BaseOptions(
         baseUrl: baseUrl,
         connectTimeout: const Duration(seconds: 10),

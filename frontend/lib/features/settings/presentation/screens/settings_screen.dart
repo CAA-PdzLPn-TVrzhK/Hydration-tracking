@@ -50,18 +50,6 @@ class SettingsScreen extends ConsumerWidget {
 
           const Divider(),
 
-          // Notifications
-          ListTile(
-            leading: const Icon(Icons.notifications),
-            title: Text(AppLocalizations.of(context)!.notifications),
-            subtitle: Text(AppLocalizations.of(context)!.waterReminders),
-            onTap: () {
-              _showNotificationSettings(context);
-            },
-          ),
-
-          const Divider(),
-
           // Profile
           ListTile(
             leading: const Icon(Icons.person),
@@ -136,22 +124,6 @@ class SettingsScreen extends ConsumerWidget {
       builder: (context) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.dailyGoal),
         content: Text(AppLocalizations.of(context)!.goalFeatureComingSoon),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context)!.ok),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showNotificationSettings(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context)!.notifications),
-        content: Text(AppLocalizations.of(context)!.notificationsFeatureComingSoon),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
