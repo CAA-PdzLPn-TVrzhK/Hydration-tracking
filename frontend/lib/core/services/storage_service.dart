@@ -178,6 +178,17 @@ class StorageService {
     return _prefs?.getString(key);
   }
 
+  // Language methods
+  /// Сохраняет выбранный пользователем язык (код, например 'en' или 'ru')
+  static Future<void> saveLanguage(String languageCode) async {
+    await _prefs?.setString('language_code', languageCode);
+  }
+
+  /// Получает сохранённый язык пользователя (код, например 'en' или 'ru')
+  static String? getLanguage() {
+    return _prefs?.getString('language_code');
+  }
+
   static Future<void> saveInt(String key, int value) async {
     await _prefs?.setInt(key, value);
   }

@@ -1,52 +1,55 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hydration_tracker/features/auth/presentation/providers/auth_provider.dart';
 
-class RegisterScreen extends StatefulWidget {
+class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
 
   @override
-  State<RegisterScreen> createState() => _RegisterScreenState();
+  ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
+class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  String _email = '';
-  bool _loading = false;
-  String? _error;
-
-  void _register() async {
-    if (!_formKey.currentState!.validate()) return;
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
-    _formKey.currentState!.save();
-    // Здесь должна быть логика запроса к API
-    await Future.delayed(const Duration(seconds: 1));
-    setState(() {
-      _loading = false;
-    });
-    // Для примера: если email не занят, регистрация успешна
-    if (_email != 'test@test.com') {
-      if (!mounted) return;
-      Navigator.pushReplacementNamed(context, '/dashboard');
-    } else {
-      setState(() {
-        _error = 'Email уже зарегистрирован';
-      });
-    }
-  }
 
   @override
   void dispose() {
+    _usernameController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
   }
 
+  void _register() async {
+    if (!_formKey.currentState!.validate()) return;
+    
+    final username = _usernameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    await ref.read(authProvider.notifier).register(
+      username: username,
+      email: email,
+      password: password,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
+
+    // Navigate to dashboard if authenticated
+    if (authState.isAuthenticated) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacementNamed(context, '/dashboard');
+      });
+    }
+
     return Scaffold(
       appBar: AppBar(title: const Text('Регистрация')),
       body: Center(
@@ -58,51 +61,80 @@ class _RegisterScreenState extends State<RegisterScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Email'),
+                  controller: _usernameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Имя пользователя',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (v) => v != null && v.trim().isNotEmpty 
+                      ? null 
+                      : 'Введите имя пользователя',
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    border: OutlineInputBorder(),
+                  ),
                   keyboardType: TextInputType.emailAddress,
-                  validator: (v) =>
-                  v != null && v.contains('@') ? null : 'Введите email',
-                  onSaved: (v) => _email = v ?? '',
+                  validator: (v) => v != null && v.contains('@') 
+                      ? null 
+                      : 'Введите корректный email',
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Пароль'),
-                  obscureText: true,
                   controller: _passwordController,
-                  validator: (v) =>
-                  v != null && v.length >= 6 ? null : 'Минимум 6 символов',
+                  decoration: const InputDecoration(
+                    labelText: 'Пароль',
+                    border: OutlineInputBorder(),
+                  ),
+                  obscureText: true,
+                  validator: (v) => v != null && v.length >= 6 
+                      ? null 
+                      : 'Минимум 6 символов',
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
-                  decoration:
-                  const InputDecoration(labelText: 'Повторите пароль'),
-                  obscureText: true,
                   controller: _confirmPasswordController,
+                  decoration: const InputDecoration(
+                    labelText: 'Повторите пароль',
+                    border: OutlineInputBorder(),
+                  ),
+                  obscureText: true,
                   validator: (v) => v == _passwordController.text
                       ? null
                       : 'Пароли не совпадают',
                 ),
                 const SizedBox(height: 24),
-                if (_error != null)
+                if (authState.error != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12),
-                    child: Text(_error!,
-                        style: const TextStyle(color: Colors.red)),
+                    child: Text(
+                      authState.error!,
+                      style: const TextStyle(color: Colors.red),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: _loading ? null : _register,
-                    child: _loading
+                    onPressed: authState.isLoading ? null : _register,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    child: authState.isLoading
                         ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2))
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
                         : const Text('Зарегистрироваться'),
                   ),
                 ),
+                const SizedBox(height: 16),
                 TextButton(
-                  onPressed: _loading
+                  onPressed: authState.isLoading
                       ? null
                       : () => Navigator.pushReplacementNamed(context, '/login'),
                   child: const Text('Уже есть аккаунт? Войти'),
