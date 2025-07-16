@@ -33,15 +33,18 @@ func TestCalculateStats(t *testing.T) {
 	if stats.TotalToday != 200 {
 		t.Errorf("TotalToday = %d, want 200", stats.TotalToday)
 	}
+	// Записи за последние 7 дней: 200 (сегодня) + 300 (2 дня назад) = 500
 	if stats.TotalWeek != 500 {
 		t.Errorf("TotalWeek = %d, want 500", stats.TotalWeek)
 	}
+	// Записи за последний месяц: 200 + 300 + 400 = 900
 	if stats.TotalMonth != 900 {
 		t.Errorf("TotalMonth = %d, want 900", stats.TotalMonth)
 	}
 	if stats.Goal != goal {
 		t.Errorf("Goal = %d, want %d", stats.Goal, goal)
 	}
+	// GoalPercentage = (200 / 1000) * 100 = 20
 	if stats.GoalPercentage != 20 {
 		t.Errorf("GoalPercentage = %d, want 20", stats.GoalPercentage)
 	}
