@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:hydration_tracker/l10n/app_localizations.dart';
 
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Scaffold(
       body: Center(
         child: Padding(
@@ -12,15 +14,15 @@ class OnboardingScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text(
-                'Добро пожаловать в Hydration Tracker!',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              Text(
+                loc.welcome,
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
-              const Text(
-                'Следите за своим водным балансом, ставьте цели и получайте напоминания!',
-                style: TextStyle(fontSize: 16),
+              Text(
+                loc.onboardingDesc,
+                style: const TextStyle(fontSize: 16),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 40),
@@ -28,7 +30,7 @@ class OnboardingScreen extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () => Navigator.pushReplacementNamed(context, '/login'),
-                  child: const Text('Начать'),
+                  child: Text(loc.start),
                 ),
               ),
             ],

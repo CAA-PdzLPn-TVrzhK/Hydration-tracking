@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hydration_tracker/core/theme/theme_provider.dart';
+import 'package:hydration_tracker/core/services/api_service.dart';
+import 'package:hydration_tracker/features/auth/presentation/providers/auth_provider.dart';
+import 'package:hydration_tracker/core/providers/language_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -70,6 +73,35 @@ class SettingsScreen extends ConsumerWidget {
 
           const Divider(),
 
+          // Language
+          Consumer(
+            builder: (context, ref, _) {
+              final locale = ref.watch(languageProvider);
+              return ListTile(
+                leading: const Icon(Icons.language),
+                title: const Text('Язык'),
+                subtitle: Text(locale.languageCode == 'en' ? 'English' : 'Русский'),
+                onTap: () {
+                  _showLanguageDialog(context, ref);
+                },
+              );
+            },
+          ),
+
+          const Divider(),
+
+          // API Status
+          ListTile(
+            leading: const Icon(Icons.wifi),
+            title: const Text('Статус API'),
+            subtitle: const Text('Проверить подключение'),
+            onTap: () {
+              _showApiStatusDialog(context);
+            },
+          ),
+
+          const Divider(),
+
           // About
           ListTile(
             leading: const Icon(Icons.info),
@@ -87,7 +119,7 @@ class SettingsScreen extends ConsumerWidget {
             leading: const Icon(Icons.logout, color: Colors.red),
             title: const Text('Выйти', style: TextStyle(color: Colors.red)),
             onTap: () {
-              _showLogoutDialog(context);
+              _showLogoutDialog(context, ref);
             },
           ),
         ],
@@ -146,6 +178,76 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
+  void _showApiStatusDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => FutureBuilder<bool>(
+        future: ApiService().isBackendAvailable(),
+        builder: (context, snapshot) {
+          final isAvailable = snapshot.data ?? false;
+          final isLoading = snapshot.connectionState == ConnectionState.waiting;
+          
+          return AlertDialog(
+            title: const Text('Статус API'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (isLoading)
+                  const Row(
+                    children: [
+                      SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                      SizedBox(width: 8),
+                      Text('Проверка подключения...'),
+                    ],
+                  )
+                else
+                  Row(
+                    children: [
+                      Icon(
+                        isAvailable ? Icons.check_circle : Icons.error,
+                        color: isAvailable ? Colors.green : Colors.red,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        isAvailable ? 'API доступен' : 'API недоступен',
+                        style: TextStyle(
+                          color: isAvailable ? Colors.green : Colors.red,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                const SizedBox(height: 16),
+                Text('Платформа: ${ApiService().getPlatformInfo()}'),
+                const SizedBox(height: 4),
+                Text('Auth API: ${ApiService.baseUrl}'),
+                const SizedBox(height: 4),
+                Text('Hydration API: ${ApiService.hydrationBaseUrl}'),
+                const SizedBox(height: 16),
+                if (!isAvailable)
+                  const Text(
+                    'Убедитесь, что бэкенд запущен на портах 8081 и 8082',
+                    style: TextStyle(fontSize: 12, color: Colors.orange),
+                  ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
   void _showAboutDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -172,7 +274,7 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showLogoutDialog(BuildContext context) {
+  void _showLogoutDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -184,14 +286,58 @@ class SettingsScreen extends ConsumerWidget {
             child: const Text('Отмена'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              Navigator.pushReplacementNamed(context, '/login');
+              await ref.read(authProvider.notifier).logout();
+              if (context.mounted) {
+                Navigator.pushReplacementNamed(context, '/login');
+              }
             },
             child: const Text('Выйти', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
+    );
+  }
+
+  void _showLanguageDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        final locale = ref.watch(languageProvider);
+        return AlertDialog(
+          title: const Text('Выберите язык'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              RadioListTile<Locale>(
+                value: const Locale('ru'),
+                groupValue: locale,
+                title: const Text('Русский'),
+                onChanged: (value) {
+                  ref.read(languageProvider.notifier).setLanguage(const Locale('ru'));
+                  Navigator.pop(context);
+                },
+              ),
+              RadioListTile<Locale>(
+                value: const Locale('en'),
+                groupValue: locale,
+                title: const Text('English'),
+                onChanged: (value) {
+                  ref.read(languageProvider.notifier).setLanguage(const Locale('en'));
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Отмена'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

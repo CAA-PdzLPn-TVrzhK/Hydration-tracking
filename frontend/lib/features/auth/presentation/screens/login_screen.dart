@@ -1,44 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hydration_tracker/features/auth/presentation/providers/auth_provider.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  String _email = '';
-  String _password = '';
-  bool _loading = false;
-  String? _error;
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   void _login() async {
     if (!_formKey.currentState!.validate()) return;
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
-    _formKey.currentState!.save();
-    // Здесь должна быть логика запроса к API
-    await Future.delayed(const Duration(seconds: 1));
-    setState(() {
-      _loading = false;
-    });
-    // Для примера: если email == test@test.com и пароль == 123456, вход успешен
-    if (_email == 'test@test.com' && _password == '123456') {
-      if (!mounted) return;
-      Navigator.pushReplacementNamed(context, '/dashboard');
-    } else {
-      setState(() {
-        _error = 'Неверный email или пароль';
-      });
-    }
+    
+    final username = _usernameController.text.trim();
+    final password = _passwordController.text;
+
+    await ref.read(authProvider.notifier).login(
+      username: username,
+      password: password,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
+
+    // Navigate to dashboard if authenticated
+    if (authState.isAuthenticated) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacementNamed(context, '/dashboard');
+      });
+    }
+
     return Scaffold(
       appBar: AppBar(title: const Text('Вход')),
       body: Center(
@@ -50,35 +55,56 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Email'),
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (v) => v != null && v.contains('@') ? null : 'Введите email',
-                  onSaved: (v) => _email = v ?? '',
+                  controller: _usernameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Имя пользователя',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (v) => v != null && v.trim().isNotEmpty 
+                      ? null 
+                      : 'Введите имя пользователя',
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Пароль'),
+                  controller: _passwordController,
+                  decoration: const InputDecoration(
+                    labelText: 'Пароль',
+                    border: OutlineInputBorder(),
+                  ),
                   obscureText: true,
-                  validator: (v) => v != null && v.length >= 6 ? null : 'Минимум 6 символов',
-                  onSaved: (v) => _password = v ?? '',
+                  validator: (v) => v != null && v.length >= 6 
+                      ? null 
+                      : 'Минимум 6 символов',
                 ),
                 const SizedBox(height: 24),
-                if (_error != null)
+                if (authState.error != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12),
-                    child: Text(_error!, style: const TextStyle(color: Colors.red)),
+                    child: Text(
+                      authState.error!,
+                      style: const TextStyle(color: Colors.red),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: _loading ? null : _login,
-                    child: _loading
-                        ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                    onPressed: authState.isLoading ? null : _login,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    child: authState.isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
                         : const Text('Войти'),
                   ),
                 ),
+                const SizedBox(height: 16),
                 TextButton(
-                  onPressed: _loading
+                  onPressed: authState.isLoading
                       ? null
                       : () => Navigator.pushReplacementNamed(context, '/register'),
                   child: const Text('Нет аккаунта? Зарегистрироваться'),

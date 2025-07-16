@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hydration_tracker/core/services/api_service.dart';
 
 final dashboardProvider = StateNotifierProvider<DashboardNotifier, AsyncValue<DashboardData>>((ref) {
   return DashboardNotifier();
@@ -7,25 +8,109 @@ final dashboardProvider = StateNotifierProvider<DashboardNotifier, AsyncValue<Da
 class DashboardNotifier extends StateNotifier<AsyncValue<DashboardData>> {
   DashboardNotifier() : super(const AsyncValue.loading());
 
-  void loadDashboardData() async {
-    // Имитация загрузки данных
-    await Future.delayed(const Duration(milliseconds: 500));
-    state = AsyncValue.data(DashboardData.mock());
+  final ApiService _apiService = ApiService();
+
+  Future<void> loadDashboardData() async {
+    try {
+      state = const AsyncValue.loading();
+      
+      // Check if backend is available first
+      final isAvailable = await _apiService.isBackendAvailable();
+      if (!isAvailable) {
+        // Use mock data if backend is not available
+        state = AsyncValue.data(DashboardData.mock());
+        return;
+      }
+      
+      // Load stats and entries in parallel
+      final statsFuture = _apiService.getHydrationStats();
+      final entriesFuture = _apiService.getHydrationEntries();
+      
+      final results = await Future.wait([statsFuture, entriesFuture]);
+      final stats = results[0] as Map<String, dynamic>;
+      final entries = results[1] as List<Map<String, dynamic>>;
+      
+      // Convert entries to WaterEntry objects
+      final waterEntries = entries.map((entry) => WaterEntry(
+        amount: entry['amount'] as int,
+        type: entry['type'] as String,
+        time: _formatTime(DateTime.parse(entry['timestamp'] as String)),
+      )).toList();
+      
+      // Generate weekly data (mock for now)
+      final weeklyData = _generateWeeklyData(stats['total_week'] as int? ?? 0);
+      
+      final data = DashboardData(
+        todayIntake: stats['total_today'] as int? ?? 0,
+        dailyGoal: stats['goal'] as int? ?? 2000,
+        percentage: stats['goal_percentage'] as int? ?? 0,
+        weeklyIntake: stats['total_week'] as int? ?? 0,
+        monthlyIntake: stats['total_month'] as int? ?? 0,
+        weeklyData: weeklyData,
+        recentEntries: waterEntries,
+      );
+      
+      state = AsyncValue.data(data);
+    } catch (error) {
+      // If API fails, use mock data and log error
+      state = AsyncValue.data(DashboardData.mock());
+    }
   }
 
-  void addWaterIntake(int amount) {
-    // Имитация добавления воды
-    if (state.value != null) {
-      final data = state.value!;
-      state = AsyncValue.data(data.copyWith(
-        todayIntake: data.todayIntake + amount,
-        percentage: ((data.todayIntake + amount) * 100 ~/ data.dailyGoal).clamp(0, 100),
-        recentEntries: [
-          WaterEntry(amount: amount, type: 'вода', time: 'сейчас'),
-          ...data.recentEntries
-        ],
-      ));
+  Future<void> addWaterIntake(int amount) async {
+    try {
+      // Add to API
+      await _apiService.createHydrationEntry(
+        amount: amount,
+        type: 'вода',
+      );
+      
+      // Reload data
+      await loadDashboardData();
+    } catch (error) {
+      // If API fails, update local state
+      if (state.value != null) {
+        final data = state.value!;
+        state = AsyncValue.data(data.copyWith(
+          todayIntake: data.todayIntake + amount,
+          percentage: ((data.todayIntake + amount) * 100 ~/ data.dailyGoal).clamp(0, 100),
+          recentEntries: [
+            WaterEntry(amount: amount, type: 'вода', time: 'сейчас'),
+            ...data.recentEntries
+          ],
+        ));
+      }
     }
+  }
+
+  Future<void> updateDailyGoal(int goal) async {
+    try {
+      await _apiService.updateDailyGoal(goal);
+      await loadDashboardData();
+    } catch (error) {
+      // Handle error
+    }
+  }
+
+  String _formatTime(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+    
+    if (difference.inMinutes < 1) {
+      return 'сейчас';
+    } else if (difference.inMinutes < 60) {
+      return '${difference.inMinutes} мин назад';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours} ч назад';
+    } else {
+      return '${dateTime.day}.${dateTime.month}.${dateTime.year}';
+    }
+  }
+
+  List<int> _generateWeeklyData(int totalWeek) {
+    // Generate mock weekly data based on total
+    final baseAmount = totalWeek ~/ 7;
+    return List.generate(7, (index) => baseAmount + (index * 50));
   }
 }
 
@@ -35,7 +120,7 @@ class DashboardData {
   final int percentage;
   final int weeklyIntake;
   final int monthlyIntake;
-  final List<dynamic> weeklyData;
+  final List<int> weeklyData;
   final List<WaterEntry> recentEntries;
 
   DashboardData({
@@ -54,7 +139,7 @@ class DashboardData {
     int? percentage,
     int? weeklyIntake,
     int? monthlyIntake,
-    List<dynamic>? weeklyData,
+    List<int>? weeklyData,
     List<WaterEntry>? recentEntries,
   }) {
     return DashboardData(
