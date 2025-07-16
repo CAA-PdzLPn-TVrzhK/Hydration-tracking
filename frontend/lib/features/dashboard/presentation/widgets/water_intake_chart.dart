@@ -53,8 +53,9 @@ class WaterIntakeChart extends StatelessWidget {
                       showTitles: true,
                       getTitlesWidget: (value, meta) {
                         final index = value.toInt();
-                        if (index < 0 || index >= data.length)
+                        if (index < 0 || index >= data.length) {
                           return const SizedBox.shrink();
+                        }
                         return Padding(
                           padding: const EdgeInsets.only(top: 4),
                           child: Text(
