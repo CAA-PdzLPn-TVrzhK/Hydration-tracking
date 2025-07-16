@@ -277,12 +277,6 @@ class ApiService {
     }
   }
 
-  // Check if user is authenticated
-  Future<bool> isAuthenticated() async {
-    final token = await _getToken();
-    return token != null;
-  }
-
   // Get current platform info for debugging
   String getPlatformInfo() {
     if (kIsWeb) {

@@ -4,6 +4,10 @@ import 'package:hydration_tracker/core/theme/theme_provider.dart';
 import 'package:hydration_tracker/core/services/api_service.dart';
 import 'package:hydration_tracker/features/auth/presentation/providers/auth_provider.dart';
 import 'package:hydration_tracker/core/providers/language_provider.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:hydration_tracker/features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:hydration_tracker/l10n/app_localizations.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -226,9 +230,9 @@ class SettingsScreen extends ConsumerWidget {
                 const SizedBox(height: 16),
                 Text('Платформа: ${ApiService().getPlatformInfo()}'),
                 const SizedBox(height: 4),
-                Text('Auth API: ${ApiService().baseUrl}'),
+                Text('Auth API: ${ApiService.baseUrl}'),
                 const SizedBox(height: 4),
-                Text('Hydration API: ${ApiService().hydrationBaseUrl}'),
+                Text('Hydration API: ${ApiService.hydrationBaseUrl}'),
                 const SizedBox(height: 16),
                 if (!isAvailable)
                   const Text(
@@ -341,4 +345,29 @@ class SettingsScreen extends ConsumerWidget {
       },
     );
   }
+}
+
+void main() {
+  testWidgets('Onboarding screen shows welcome text', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('en'),
+          Locale('ru'),
+        ],
+        locale: const Locale('ru'), // или 'en', если тестируешь английский
+        home: const OnboardingScreen(),
+      ),
+    );
+
+    // Используй локализованный текст
+    final welcomeText = AppLocalizations.of(tester.element(find.byType(OnboardingScreen)))!.welcome;
+    expect(find.text(welcomeText), findsOneWidget);
+  });
 }
