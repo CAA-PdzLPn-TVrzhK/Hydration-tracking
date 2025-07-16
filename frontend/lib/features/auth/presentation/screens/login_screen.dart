@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hydration_tracker/features/auth/presentation/providers/auth_provider.dart';
+import 'package:hydration_tracker/l10n/app_localizations.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -45,7 +46,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Вход')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.login)),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -56,25 +57,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               children: [
                 TextFormField(
                   controller: _usernameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Имя пользователя',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.username,
+                    border: const OutlineInputBorder(),
                   ),
                   validator: (v) => v != null && v.trim().isNotEmpty 
                       ? null 
-                      : 'Введите имя пользователя',
+                      : AppLocalizations.of(context)!.enterUsername,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _passwordController,
-                  decoration: const InputDecoration(
-                    labelText: 'Пароль',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.password,
+                    border: const OutlineInputBorder(),
                   ),
                   obscureText: true,
                   validator: (v) => v != null && v.length >= 6 
                       ? null 
-                      : 'Минимум 6 символов',
+                      : AppLocalizations.of(context)!.min6chars,
                 ),
                 const SizedBox(height: 24),
                 if (authState.error != null)
@@ -99,7 +100,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             width: 20,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('Войти'),
+                        : Text(AppLocalizations.of(context)!.login),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -107,7 +108,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   onPressed: authState.isLoading
                       ? null
                       : () => Navigator.pushReplacementNamed(context, '/register'),
-                  child: const Text('Нет аккаунта? Зарегистрироваться'),
+                  child: Text(AppLocalizations.of(context)!.noAccountRegister),
                 ),
               ],
             ),

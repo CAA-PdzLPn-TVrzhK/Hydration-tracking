@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hydration_tracker/l10n/app_localizations.dart';
 
 class WaterIntakeChart extends StatelessWidget {
   final List<dynamic> data;
@@ -10,7 +11,7 @@ class WaterIntakeChart extends StatelessWidget {
     return Container(
       height: 150,
       color: Colors.blue[50],
-      child: const Center(child: Text('График воды (заглушка)')),
+      child: Center(child: Text(AppLocalizations.of(context)!.waterChartStub)),
     );
   }
 } 

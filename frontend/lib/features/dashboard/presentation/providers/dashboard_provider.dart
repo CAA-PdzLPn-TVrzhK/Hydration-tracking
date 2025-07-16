@@ -62,7 +62,7 @@ class DashboardNotifier extends StateNotifier<AsyncValue<DashboardData>> {
       // Add to API
       await _apiService.createHydrationEntry(
         amount: amount,
-        type: 'вода',
+        type: 'water',
       );
       
       // Reload data
@@ -75,7 +75,7 @@ class DashboardNotifier extends StateNotifier<AsyncValue<DashboardData>> {
           todayIntake: data.todayIntake + amount,
           percentage: ((data.todayIntake + amount) * 100 ~/ data.dailyGoal).clamp(0, 100),
           recentEntries: [
-            WaterEntry(amount: amount, type: 'вода', time: 'сейчас'),
+            WaterEntry(amount: amount, type: 'water', time: 'now'),
             ...data.recentEntries
           ],
         ));
@@ -97,11 +97,11 @@ class DashboardNotifier extends StateNotifier<AsyncValue<DashboardData>> {
     final difference = now.difference(dateTime);
     
     if (difference.inMinutes < 1) {
-      return 'сейчас';
+      return 'now';
     } else if (difference.inMinutes < 60) {
-      return '${difference.inMinutes} мин назад';
+      return '${difference.inMinutes} min ago';
     } else if (difference.inHours < 24) {
-      return '${difference.inHours} ч назад';
+      return '${difference.inHours} h ago';
     } else {
       return '${dateTime.day}.${dateTime.month}.${dateTime.year}';
     }
@@ -162,7 +162,7 @@ class DashboardData {
       monthlyIntake: 12000,
       weeklyData: [500, 600, 700, 800, 900, 1000, 1200],
       recentEntries: [
-        WaterEntry(amount: 300, type: 'вода', time: '10:00'),
+        WaterEntry(amount: 300, type: 'water', time: '10:00'),
         WaterEntry(amount: 200, type: 'чай', time: '09:00'),
       ],
     );

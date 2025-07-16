@@ -54,7 +54,35 @@ class AppLocalizationsRu extends AppLocalizations {
   String get todayDrank => 'Сегодня выпито';
 
   @override
-  String get progress => 'Прогресс';
+  String drankOfGoal(Object current, Object goal) {
+    return '$current мл из $goal мл';
+  }
+
+  @override
+  String progress(Object percent) {
+    return 'Прогресс: $percent%';
+  }
+
+  @override
+  String percent(Object percent) {
+    return '$percent%';
+  }
+
+  @override
+  String get waterType => 'вода';
+
+  @override
+  String get now => 'сейчас';
+
+  @override
+  String minAgo(Object minutes) {
+    return '$minutes мин назад';
+  }
+
+  @override
+  String hAgo(Object hours) {
+    return '$hours ч назад';
+  }
 
   @override
   String get addWaterIntake => 'Добавить воду';
@@ -139,4 +167,94 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get noEntriesYet => 'Записей пока нет';
+
+  @override
+  String get personalData => 'Личные данные';
+
+  @override
+  String get waterReminders => 'Напоминания о воде';
+
+  @override
+  String get checkConnection => 'Проверить подключение';
+
+  @override
+  String get version => 'Версия';
+
+  @override
+  String get goalFeatureComingSoon => 'Функция настройки дневной цели будет добавлена в следующем обновлении.';
+
+  @override
+  String get notificationsFeatureComingSoon => 'Настройки уведомлений будут добавлены в следующем обновлении.';
+
+  @override
+  String get profileFeatureComingSoon => 'Редактирование профиля будет добавлено в следующем обновлении.';
+
+  @override
+  String get checkingConnection => 'Проверка подключения...';
+
+  @override
+  String get apiAvailable => 'API доступен';
+
+  @override
+  String get apiUnavailable => 'API недоступен';
+
+  @override
+  String get makeSureBackendRunning => 'Убедитесь, что бэкенд запущен на портах 8081 и 8082';
+
+  @override
+  String get aboutAppDesc => 'Приложение для отслеживания потребления воды';
+
+  @override
+  String get logoutConfirm => 'Вы уверены, что хотите выйти из аккаунта?';
+
+  @override
+  String get dashboardLoadError => 'Ошибка загрузки дашборда';
+
+  @override
+  String get weeklyProgress => 'Прогресс за неделю';
+
+  @override
+  String get waterChartStub => 'График воды (заглушка)';
+
+  @override
+  String get repeatPassword => 'Повторите пароль';
+
+  @override
+  String get passwordsDontMatch => 'Пароли не совпадают';
+
+  @override
+  String get alreadyHaveAccountLogin => 'Уже есть аккаунт? Войти';
+
+  @override
+  String get noAccountRegister => 'Нет аккаунта? Зарегистрироваться';
+
+  @override
+  String get ml => 'мл';
+
+  @override
+  String platformInfo(Object platform) {
+    return 'Платформа: $platform';
+  }
+
+  @override
+  String authApiInfo(Object url) {
+    return 'Auth API: $url';
+  }
+
+  @override
+  String hydrationApiInfo(Object url) {
+    return 'Hydration API: $url';
+  }
+
+  @override
+  String get enterValidEmail => 'Введите корректный email';
+
+  @override
+  String get minutesAgo => 'мин назад';
+
+  @override
+  String get hoursAgo => 'ч назад';
+
+  @override
+  String get teaType => 'чай';
 }

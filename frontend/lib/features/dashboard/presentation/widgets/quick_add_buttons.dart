@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hydration_tracker/l10n/app_localizations.dart';
 
 class QuickAddButtons extends StatelessWidget {
   final void Function(int) onAddWater;
@@ -11,15 +12,15 @@ class QuickAddButtons extends StatelessWidget {
       children: [
         ElevatedButton(
           onPressed: () => onAddWater(200),
-          child: const Text('+200 мл'),
+          child: Text('+200 ${AppLocalizations.of(context)!.ml}'),
         ),
         ElevatedButton(
           onPressed: () => onAddWater(300),
-          child: const Text('+300 мл'),
+          child: Text('+300 ${AppLocalizations.of(context)!.ml}'),
         ),
         ElevatedButton(
           onPressed: () => onAddWater(500),
-          child: const Text('+500 мл'),
+          child: Text('+500 ${AppLocalizations.of(context)!.ml}'),
         ),
       ],
     );
